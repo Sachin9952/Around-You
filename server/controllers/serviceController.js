@@ -1,0 +1,187 @@
+const Service = require('../models/Service');
+const ErrorResponse = require('../utils/errorResponse');
+
+// @desc    Create a new service
+// @route   POST /api/services
+// @access  Private (Provider only)
+exports.createService = async (req, res, next) => {
+  try {
+    // Attach provider ID from logged-in user
+    req.body.provider = req.user.id;
+
+    // Check if provider is approved
+    if (!req.user.isApproved) {
+      return next(
+        new ErrorResponse('Your provider account is pending approval', 403)
+      );
+    }
+
+    const service = await Service.create(req.body);
+
+    res.status(201).json({
+      success: true,
+      data: service,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get all services (with filtering & search)
+// @route   GET /api/services
+// @access  Public
+exports.getServices = async (req, res, next) => {
+  try {
+    const { category, location, search, minPrice, maxPrice, sort, page = 1, limit = 10 } = req.query;
+
+    const query = { isActive: true };
+
+    // Filter by category
+    if (category) {
+      query.category = category;
+    }
+
+    // Filter by location (case-insensitive partial match)
+    if (location) {
+      query.location = { $regex: location, $options: 'i' };
+    }
+
+    // Text search on title/description
+    if (search) {
+      query.$text = { $search: search };
+    }
+
+    // Price range filter
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    // Sort options
+    let sortOption = { createdAt: -1 }; // default: newest first
+    if (sort === 'price_asc') sortOption = { price: 1 };
+    else if (sort === 'price_desc') sortOption = { price: -1 };
+    else if (sort === 'rating') sortOption = { averageRating: -1 };
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const services = await Service.find(query)
+      .populate('provider', 'name email phone avatar')
+      .sort(sortOption)
+      .skip(skip)
+      .limit(Number(limit));
+
+    const total = await Service.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      count: services.length,
+      total,
+      totalPages: Math.ceil(total / Number(limit)),
+      currentPage: Number(page),
+      data: services,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get single service
+// @route   GET /api/services/:id
+// @access  Public
+exports.getService = async (req, res, next) => {
+  try {
+    const service = await Service.findById(req.params.id).populate(
+      'provider',
+      'name email phone avatar'
+    );
+
+    if (!service) {
+      return next(new ErrorResponse('Service not found', 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      data: service,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Update service
+// @route   PUT /api/services/:id
+// @access  Private (Provider — owner only)
+exports.updateService = async (req, res, next) => {
+  try {
+    let service = await Service.findById(req.params.id);
+
+    if (!service) {
+      return next(new ErrorResponse('Service not found', 404));
+    }
+
+    // Check ownership
+    if (service.provider.toString() !== req.user.id && req.user.role !== 'admin') {
+      return next(new ErrorResponse('Not authorized to update this service', 403));
+    }
+
+    service = await Service.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: service,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Delete service
+// @route   DELETE /api/services/:id
+// @access  Private (Provider — owner or Admin)
+exports.deleteService = async (req, res, next) => {
+  try {
+    const service = await Service.findById(req.params.id);
+
+    if (!service) {
+      return next(new ErrorResponse('Service not found', 404));
+    }
+
+    // Check ownership or admin
+    if (service.provider.toString() !== req.user.id && req.user.role !== 'admin') {
+      return next(new ErrorResponse('Not authorized to delete this service', 403));
+    }
+
+    await service.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      data: {},
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get services by logged-in provider
+// @route   GET /api/services/my
+// @access  Private (Provider)
+exports.getMyServices = async (req, res, next) => {
+  try {
+    const services = await Service.find({ provider: req.user.id }).sort({
+      createdAt: -1,
+    });
+
+    res.status(200).json({
+      success: true,
+      count: services.length,
+      data: services,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
