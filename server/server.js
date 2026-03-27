@@ -16,12 +16,11 @@ const app = express();
 app.use(express.json());
 
 // Enable CORS
-app.use(
-  cors({
-    origin: 'http://localhost:5173', // Vite dev server
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: ["http://localhost:5173", "https://your-frontend.vercel.app"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
 // ---------- Mount Routes ----------
 app.use('/api/auth', require('./routes/authRoutes'));
