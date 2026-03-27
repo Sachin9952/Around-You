@@ -16,8 +16,9 @@ const app = express();
 app.use(express.json());
 
 // Enable CORS
+
 app.use(cors({
-  origin: ["http://localhost:5173", "https://your-frontend.vercel.app"],
+  origin: "https://around-you-ten.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
