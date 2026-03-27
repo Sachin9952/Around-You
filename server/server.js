@@ -39,6 +39,10 @@ app.get('/api/health', (req, res) => {
 // Global error handler (must be after route mounting)
 app.use(errorHandler);
 
+app.get("/", (req, res) => {
+  res.send("API is live ");
+});
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
