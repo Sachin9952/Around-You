@@ -4,9 +4,9 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const http = require('http');
+const app = express();
 const {Server} = require('socket.io');
 const server = http.createServer(app);
-const app = express();
 
 // 🔥 Attach socket to your existing backend
 const io = new Server(server, {
@@ -44,6 +44,7 @@ io.on("connection", (socket) => {
 
 // ❗ IMPORTANT: use server.listen not app.listen
 server.listen(5000, () => console.log("Server running"));
+
 
 // Load environment variables
 dotenv.config();
