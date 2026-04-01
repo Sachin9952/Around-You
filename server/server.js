@@ -5,7 +5,7 @@ const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const http = require('http');
 const {Server} = require('socket.io');
-const server = http.createServer(express());
+const server = http.createServer(app);
 const app = express();
 
 // 🔥 Attach socket to your existing backend
@@ -59,7 +59,7 @@ app.use(express.json());
 
 app.use(cors({
   origin: [
-     "http://localhost:5173", 
+   "http://localhost:5173", 
     "https://around-you-ten.vercel.app"
 
   ],
