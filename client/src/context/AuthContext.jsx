@@ -12,19 +12,32 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // Initialize user from localStorage immediately to prevent flash on refresh.
+  // This ensures the user object is available synchronously before the /auth/me
+  // call completes, so ProtectedRoute doesn't redirect to /login momentarily.
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
-  // On mount, if token exists, fetch user profile
+  // On mount, if token exists, validate it with the server and refresh user data
   useEffect(() => {
     const loadUser = async () => {
       if (token) {
         try {
           const res = await API.get('/auth/me');
-          setUser(res.data.user);
+          const freshUser = res.data.user;
+          setUser(freshUser);
+          // Keep localStorage in sync with latest server data
+          localStorage.setItem('user', JSON.stringify(freshUser));
         } catch {
-          // Token invalid/expired
+          // Token invalid/expired — clear auth state
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           setToken(null);

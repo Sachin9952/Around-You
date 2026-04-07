@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { HiSearch, HiArrowRight, HiShieldCheck, HiClock, HiStar } from 'react-icons/hi';
-import { 
-  HiWrenchScrewdriver, HiBolt, HiSparkles, HiPaintBrush, 
-  HiCube, HiCog6Tooth, HiAcademicCap 
+import {
+  HiWrenchScrewdriver, HiBolt, HiSparkles, HiPaintBrush,
+  HiCube, HiCog6Tooth, HiAcademicCap
 } from 'react-icons/hi2';
 
 const categories = [
@@ -41,19 +41,23 @@ const Home = () => {
             </h1>
 
             <p className="text-lg sm:text-xl text-dark-100 max-w-2xl mx-auto mb-10">
-              Connect with verified plumbers, electricians, cleaners, and more. 
+              Connect with verified plumbers, electricians, cleaners, and more.
               Book trusted professionals in your area with just a few clicks.
             </p>
 
             {/* Search Bar */}
-            <div className="max-w-xl mx-auto">
+            <div className="max-w-xl mx-auto px-8 sm:px-4">
               <Link
                 to="/services"
                 className="flex items-center gap-3 glass px-5 py-4 cursor-pointer
                   hover:border-primary-500/30 transition-all duration-300 group"
               >
                 <HiSearch className="w-5 h-5 text-dark-200 group-hover:text-primary-400 transition-colors" />
-                <span className="text-dark-200 flex-1 text-left">Search for a service or category...</span>
+                {/* <span className="text-dark-200 flex-1 text-left">Search for a service or category...</span> */}
+                <span className="text-dark-200 flex-1 text-left">
+                  <span className="block sm:hidden">Search for a service</span>
+                  <span className="hidden sm:block">Search for a service or category...</span>
+                </span>
                 <span className="btn-primary !py-2 !px-4 text-sm flex items-center gap-1">
                   Search <HiArrowRight className="w-4 h-4" />
                 </span>

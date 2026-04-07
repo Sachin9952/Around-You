@@ -4,7 +4,7 @@ import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import StarRating from '../components/StarRating';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { HiStar, HiLocationMarker, HiCurrencyRupee, HiPhone, HiMail, HiCalendar } from 'react-icons/hi';
+import { HiStar, HiLocationMarker, HiCurrencyRupee, HiPhone, HiMail, HiCalendar, HiChatAlt2 } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
 const ServiceDetail = () => {
@@ -165,6 +165,16 @@ const ServiceDetail = () => {
                 <HiMail className="w-4 h-4" />
                 {service.provider.email}
               </div>
+              {/* Chat with Provider Button */}
+              {user && user._id !== service.provider._id && (
+                <button
+                  className="btn-secondary inline-flex items-center gap-2 mt-4"
+                  onClick={() => navigate(`/chat/${service.provider._id}`)}
+                >
+                  <HiChatAlt2 className="w-5 h-5" />
+                  Chat with Provider
+                </button>
+              )}
             </div>
           )}
         </div>

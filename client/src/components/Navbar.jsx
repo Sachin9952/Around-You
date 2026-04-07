@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { 
-  HiMenu, HiX, HiUser, HiLogout, HiViewGrid, 
-  HiBookmark, HiPlusCircle, HiClipboardList, 
+import {
+  HiMenu, HiX, HiUser, HiLogout, HiViewGrid,
+  HiBookmark, HiPlusCircle, HiClipboardList,
   HiBell, HiCog, HiChevronDown, HiChatAlt2
 } from 'react-icons/hi';
 
@@ -61,6 +61,13 @@ const Navbar = () => {
             {isAuthenticated ? (
               <div className="flex items-center gap-4">
                 <Link
+                  to="/inbox"
+                  className="flex items-center gap-1.5 text-dark-100 hover:text-white transition-colors text-sm font-medium"
+                >
+                  <HiChatAlt2 className="w-4 h-4" />
+                  Chats
+                </Link>
+                <Link
                   to={getDashboardPath()}
                   className="flex items-center gap-1.5 text-dark-100 hover:text-white transition-colors text-sm font-medium"
                 >
@@ -68,7 +75,7 @@ const Navbar = () => {
                   Dashboard
                 </Link>
                 <div className="relative pl-4 border-l border-dark-400" ref={dropdownRef}>
-                  <button 
+                  <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                     className="flex items-center gap-2 hover:bg-dark-600/50 p-1.5 rounded-xl transition-colors"
                   >
@@ -114,8 +121,8 @@ const Navbar = () => {
                       </div>
 
                       <div className="p-2 border-t border-white/5">
-                        <button 
-                          onClick={handleLogout} 
+                        <button
+                          onClick={handleLogout}
                           className="flex items-center w-full gap-3 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
                         >
                           <HiLogout className="w-4 h-4" /> Logout
@@ -181,6 +188,9 @@ const Navbar = () => {
                   </Link>
                   <Link to={getDashboardPath()} onClick={() => setIsOpen(false)} className="flex items-center gap-2 p-2 rounded-xl border border-white/5 bg-dark-600/30 hover:bg-dark-500/50 transition-colors">
                     <HiClipboardList className="w-4 h-4 text-primary-400" /> <span className="text-sm text-dark-100">Bookings</span>
+                  </Link>
+                  <Link to="/inbox" onClick={() => setIsOpen(false)} className="flex items-center gap-2 p-2 rounded-xl border border-white/5 bg-dark-600/30 hover:bg-dark-500/50 transition-colors col-span-2 justify-center">
+                    <HiChatAlt2 className="w-4 h-4 text-primary-400" /> <span className="text-sm text-dark-100 font-medium">Chats</span>
                   </Link>
 
                   {user?.role === 'admin' ? (

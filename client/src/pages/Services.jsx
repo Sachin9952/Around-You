@@ -76,8 +76,8 @@ const Services = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-6">Browse Services</h1>
 
-        <form onSubmit={handleSearch} className="flex gap-3">
-          <div className="relative flex-1">
+        <form onSubmit={handleSearch} className="flex flex-wrap gap-3">
+          <div className="relative flex-1 min-w-[180px]">
             <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-200" />
             <input
               type="text"
@@ -87,7 +87,7 @@ const Services = () => {
               placeholder="Search services..."
             />
           </div>
-          <div className="relative flex-shrink-0 w-48">
+          <div className="relative flex-1 min-w-[140px] sm:flex-none sm:w-48">
             <input
               type="text"
               value={filters.location}
@@ -96,16 +96,18 @@ const Services = () => {
               placeholder="Location..."
             />
           </div>
-          <button type="submit" className="btn-primary">
-            Search
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowFilters(!showFilters)}
-            className={`btn-secondary flex items-center gap-2 ${showFilters ? 'border-primary-500 text-primary-400' : ''}`}
-          >
-            <HiAdjustments className="w-5 h-5" />
-          </button>
+          <div className="flex gap-3 w-full sm:w-auto">
+            <button type="submit" className="btn-primary !px-3" aria-label="Search">
+              <HiSearch className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              className={`btn-secondary flex items-center gap-2 ${showFilters ? 'border-primary-500 text-primary-400' : ''}`}
+            >
+              <HiAdjustments className="w-5 h-5" />
+            </button>
+          </div>
         </form>
       </div>
 

@@ -22,7 +22,9 @@ API.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       // Only redirect if not already on auth pages
-      if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+      const authPaths = ['/login', '/register', '/provider/login', '/provider/register'];
+      const isOnAuthPage = authPaths.some(p => window.location.pathname.startsWith(p));
+      if (!isOnAuthPage) {
         window.location.href = '/login';
       }
     }

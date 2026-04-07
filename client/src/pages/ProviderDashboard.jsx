@@ -15,12 +15,16 @@ const statusColors = {
 
 const categories = ['plumber', 'electrician', 'cleaner', 'painter', 'carpenter', 'mechanic', 'tutor', 'other'];
 
+import { useNavigate } from 'react-router-dom';
+import { HiChatAlt2 } from 'react-icons/hi';
+
 const ProviderDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('bookings');
   const [bookings, setBookings] = useState([]);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Service form
   const [showServiceForm, setShowServiceForm] = useState(false);
@@ -132,7 +136,7 @@ const ProviderDashboard = () => {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6">
-        {['bookings', 'services'].map((tab) => (
+        {['bookings', 'services', 'messages'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -146,6 +150,34 @@ const ProviderDashboard = () => {
           </button>
         ))}
       </div>
+      {/* MESSAGES TAB */}
+      {activeTab === 'messages' && (
+        <div className="card p-6">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><HiChatAlt2 className="w-6 h-6" />Messages</h2>
+          {bookings.length === 0 ? (
+            <div className="text-dark-200">No customers to chat with yet.</div>
+          ) : (
+            <div className="space-y-4">
+              {bookings.map((booking) => (
+                booking.customer && (
+                  <div key={booking._id} className="flex items-center justify-between bg-dark-700 rounded-lg p-4">
+                    <div>
+                      <div className="font-semibold text-white">{booking.customer.name}</div>
+                      <div className="text-dark-200 text-sm">{booking.customer.email}</div>
+                    </div>
+                    <button
+                      className="btn-secondary flex items-center gap-2"
+                      onClick={() => navigate(`/chat/${booking.customer._id}`)}
+                    >
+                      <HiChatAlt2 className="w-5 h-5" /> Chat
+                    </button>
+                  </div>
+                )
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* BOOKINGS TAB */}
       {activeTab === 'bookings' && (

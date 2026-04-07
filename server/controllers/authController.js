@@ -95,6 +95,26 @@ exports.getMe = async (req, res, next) => {
   }
 };
 
+// @desc    Get user by ID (for chat/public profiles)
+// @route   GET /api/auth/users/:id
+// @access  Private
+exports.getUserById = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select('name avatar role');
+
+    if (!user) {
+      return next(new ErrorResponse('User not found', 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // @desc    Update user profile
 // @route   PUT /api/auth/profile
 // @access  Private

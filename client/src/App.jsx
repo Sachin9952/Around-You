@@ -3,6 +3,9 @@ import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
+import ChatPage from "./chat/ChatPage";
+import ChatDemo from "./chat/ChatDemo";
+import Inbox from "./pages/Inbox";
 
 // Pages
 import Home from './pages/Home';
@@ -36,6 +39,9 @@ function App() {
               <Route path="/provider/register" element={<ProviderRegister />} />
               <Route path="/services" element={<Services />} />
               <Route path="/services/:id" element={<ServiceDetail />} />
+              <Route path="/chat/:providerId" element={<ChatPage />} />
+              <Route path="/chat-demo" element={<ChatDemo />} />
+              <Route path="/inbox" element={<ProtectedRoute><Inbox /></ProtectedRoute>} />
 
               {/* Customer Routes */}
               <Route
