@@ -41,6 +41,19 @@ const io = new Server(server, {
   }
 });
 
+const jwt = require('jsonwebtoken');
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) return next(new Error("Authentication error"));
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) return next(new Error("Authentication error"));
+    socket.user = decoded; // Attach user info to socket
+    next();
+  });
+});
+
 // Make io accessible in routes (optional advanced)
 app.set("io", io);
 
@@ -52,19 +65,24 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send_message", async (data) => {
-    try {
-      // Save to DB
-      const saved = await Message.create(data);
-      // Emit to all clients in the room (including sender)
-      io.to(data.room).emit("receive_message", {
-        ...data,
-        _id: saved._id,
-      });
-    } catch (err) {
-      console.error("Error saving message:", err);
-      // Still emit so the sender sees it (best effort)
-      io.to(data.room).emit("receive_message", data);
-    }
+      try {
+        // Always trust the authenticated user for senderId
+        const msgData = {
+          ...data,
+          senderId: socket.user.id,
+        };
+        // Save to DB
+        const saved = await Message.create(msgData);
+        // Emit to all clients in the room (including sender)
+        io.to(msgData.room).emit("receive_message", {
+          ...msgData,
+          _id: saved._id,
+        });
+      } catch (err) {
+        console.error("Error saving message:", err);
+        // Still emit so the sender sees it (best effort)
+        io.to(data.room).emit("receive_message", data);
+      }
   });
 
   // Typing events

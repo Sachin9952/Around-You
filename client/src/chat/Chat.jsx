@@ -50,10 +50,24 @@ const DUMMY_MESSAGES = [
   },
 ];
 
-// Singleton socket connection
-const socket = io(import.meta.env.VITE_API_URL || "http://localhost:5000", {
-  autoConnect: false,
-});
+// Helper: create or return an existing socket with the *current* JWT token.
+// We keep the reference in a module-level variable so every Chat mount
+// shares the same connection, but re-create it when the token changes.
+let _socket = null;
+let _lastToken = null;
+
+function getSocket() {
+  const token = localStorage.getItem("token");
+  if (!_socket || _lastToken !== token) {
+    if (_socket) _socket.disconnect();
+    _lastToken = token;
+    _socket = io(import.meta.env.VITE_API_URL || "http://localhost:5000", {
+      autoConnect: false,
+      auth: { token },
+    });
+  }
+  return _socket;
+}
 
 /**
  * Chat — Main chat component orchestrating:
@@ -92,6 +106,7 @@ const Chat = ({
   useEffect(() => {
     if (useDummy) return;
 
+    const socket = getSocket();
     socket.connect();
     socket.emit("join_room", roomId);
 
@@ -173,21 +188,21 @@ const Chat = ({
     (text) => {
       if (!text) return;
 
+      // senderId will be set by the server
       const msgData = {
         room: roomId,
-        senderId: userId,
         message: text,
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         status: "sent",
       };
 
       if (useDummy) {
-        setMessages((prev) => [...prev, { ...msgData, _id: Date.now().toString() }]);
+        setMessages((prev) => [...prev, { ...msgData, senderId: userId, _id: Date.now().toString() }]);
         return;
       }
 
-      socket.emit("send_message", msgData);
-      socket.emit("stop_typing", { room: roomId, senderId: userId });
+      getSocket().emit("send_message", msgData);
+      getSocket().emit("stop_typing", { room: roomId, senderId: userId });
     },
     [roomId, userId, useDummy]
   );
@@ -225,7 +240,7 @@ const Chat = ({
           return;
         }
 
-        socket.emit("send_message", msgData);
+        getSocket().emit("send_message", msgData);
       } catch (error) {
         console.error("Error uploading image:", error);
       }
@@ -236,7 +251,7 @@ const Chat = ({
   // ─── Typing notification ────────────────────────────────────────
   const handleTypingNotify = useCallback(() => {
     if (useDummy) return;
-    socket.emit("typing", { room: roomId, senderId: userId });
+    getSocket().emit("typing", { room: roomId, senderId: userId });
   }, [roomId, userId, useDummy]);
 
   // ─── Grouped messages with date separators (future-ready) ───────
