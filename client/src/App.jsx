@@ -22,14 +22,15 @@ import AdminSupport from './pages/AdminSupport';
 import Settings from './pages/Settings';
 import PostRequest from './pages/PostRequest';
 import Notifications from './pages/Notifications';
+import Footer from './components/Footer';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="min-h-screen bg-dark-900">
+        <div className="min-h-screen bg-dark-900 flex flex-col">
           <Navbar />
-          <main>
+          <main className="flex-1">
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
@@ -110,7 +111,7 @@ function App() {
               <Route
                 path="*"
                 element={
-                  <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+                  <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-dark-900 border-t border-dark-900">
                     <div className="text-center">
                       <h1 className="text-6xl font-bold text-primary-500 mb-4">404</h1>
                       <p className="text-xl text-dark-200">Page not found</p>
@@ -120,6 +121,7 @@ function App() {
               />
             </Routes>
           </main>
+          <Footer />
         </div>
 
         {/* Toast notifications */}

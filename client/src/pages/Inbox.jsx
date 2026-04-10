@@ -38,88 +38,89 @@ const Inbox = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 min-h-[calc(100vh-4rem)]">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-12 h-12 bg-primary-600/20 rounded-xl flex items-center justify-center border border-primary-500/30">
-          <HiChatAlt2 className="w-6 h-6 text-primary-400" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-white">Your Chats</h1>
-          <p className="text-dark-200 text-sm">Recent conversations with providers and customers.</p>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      ) : chats.length === 0 ? (
-        <div className="glass p-12 text-center rounded-2xl flex flex-col items-center border-dark-600/50">
-          <div className="w-20 h-20 bg-dark-700 rounded-full flex items-center justify-center mb-4">
-            <span className="text-4xl text-dark-300">💬</span>
+    <div className="bg-[#F5FDFD] min-h-screen py-10 font-sans">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 flex items-center gap-4 bg-white p-6 sm:p-8 rounded-[2rem] border border-[#E0F5F3] shadow-sm">
+          <div className="w-14 h-14 bg-[#E0F5F3] rounded-full flex items-center justify-center border border-[#45B1A8]/20 shrink-0">
+            <HiChatAlt2 className="w-7 h-7 text-[#45B1A8]" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">No messages yet</h3>
-          <p className="text-dark-200">When you start a conversation, it will appear here.</p>
-          <button 
-            onClick={() => navigate('/services')} 
-            className="mt-6 btn-primary"
-          >
-            Browse Services
-          </button>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-[#1A2B2A]">Your Chats</h1>
+            <p className="text-[#4A5568] mt-1 font-medium text-sm md:text-base">Recent conversations with your service providers and customers.</p>
+          </div>
         </div>
-      ) : (
-        <div className="glass rounded-2xl overflow-hidden border border-dark-500/50 divide-y divide-dark-600/50 shadow-lg shadow-black/20">
-          {chats.map((chat) => (
-            <Link
-              key={chat.room}
-              to={`/chat/${chat.partner._id}`}
-              className="flex items-center justify-between p-4 hover:bg-dark-600/50 transition-colors group cursor-pointer"
+
+        {loading ? (
+          <div className="bg-white py-20 rounded-[2.5rem] border border-[#E0F5F3] shadow-sm flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-[#45B1A8] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : chats.length === 0 ? (
+          <div className="bg-white p-12 text-center rounded-[2.5rem] border border-[#E0F5F3] shadow-sm border-dashed flex flex-col items-center">
+            <div className="w-16 h-16 bg-[#F5FDFD] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#E0F5F3]">
+              <span className="text-3xl">💬</span>
+            </div>
+            <h3 className="text-xl font-bold text-[#1A2B2A] mb-2">No messages yet</h3>
+            <p className="text-[#4A5568] font-medium max-w-sm">When you start a conversation by messaging a provider, it will appear here.</p>
+            <button 
+              onClick={() => navigate('/services')} 
+              className="mt-6 bg-[#1A2B2A] text-white px-8 py-3.5 rounded-full font-bold hover:bg-black transition-colors"
             >
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="relative">
-                  {chat.partner.avatar ? (
-                    <img 
-                      src={chat.partner.avatar} 
-                      alt="" 
-                      className="w-12 h-12 rounded-full object-cover ring-2 ring-dark-600"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center ring-2 ring-dark-600">
-                      <span className="text-sm font-semibold text-white">
-                        {chat.partner.name?.charAt(0).toUpperCase() || '?'}
+              Browse Services
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-[2rem] overflow-hidden border border-[#E0F5F3] divide-y divide-[#E0F5F3] shadow-sm">
+            {chats.map((chat) => (
+              <Link
+                key={chat.room}
+                to={`/chat/${chat.partner._id}`}
+                className="flex items-center justify-between p-5 sm:p-6 hover:bg-[#F5FDFD] transition-colors group cursor-pointer"
+              >
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="relative shrink-0">
+                    {chat.partner.avatar ? (
+                      <img 
+                        src={chat.partner.avatar} 
+                        alt="" 
+                        className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm ring-1 ring-[#E0F5F3]"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-full bg-[#E0F5F3] flex items-center justify-center border-2 border-white shadow-sm ring-1 ring-[#E0F5F3]">
+                        <span className="text-xl font-black text-[#45B1A8]">
+                          {chat.partner.name?.charAt(0).toUpperCase() || '?'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <h3 className="text-lg font-bold text-[#1A2B2A] truncate group-hover:text-[#45B1A8] transition-colors">
+                        {chat.partner.name}
+                      </h3>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F5FDFD] text-[#45B1A8] font-bold border border-[#E0F5F3] uppercase tracking-wider hidden sm:inline-block">
+                        {chat.partner.role}
                       </span>
                     </div>
-                  )}
-                  {/* Minimal unread indicator or status could go here */}
+                    <p className="text-sm font-medium text-[#4A5568] truncate pr-4">
+                      {chat.latestMessage}
+                    </p>
+                  </div>
                 </div>
                 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-base font-semibold text-white truncate">
-                      {chat.partner.name}
-                    </h3>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-dark-600 text-dark-200 border border-dark-500">
-                      {chat.partner.role}
-                    </span>
+                <div className="flex flex-col items-end gap-3 shrink-0 ml-4">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                    {formatTime(chat.createdAt)}
+                  </span>
+                  <div className="w-8 h-8 rounded-full bg-[#F5FDFD] border border-[#E0F5F3] group-hover:bg-[#45B1A8]/10 group-hover:border-[#45B1A8]/30 flex items-center justify-center transition-colors">
+                    <HiChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#45B1A8]" />
                   </div>
-                  <p className="text-sm text-dark-200 truncate pr-4">
-                    {chat.latestMessage}
-                  </p>
                 </div>
-              </div>
-              
-              <div className="flex flex-col items-end gap-2 shrink-0 ml-4">
-                <span className="text-xs text-dark-300 font-medium">
-                  {formatTime(chat.createdAt)}
-                </span>
-                <div className="w-6 h-6 rounded-full bg-dark-700 group-hover:bg-primary-600/20 flex items-center justify-center transition-colors">
-                  <HiChevronRight className="w-4 h-4 text-dark-400 group-hover:text-primary-400" />
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

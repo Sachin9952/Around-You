@@ -269,7 +269,7 @@ const Chat = ({
 
   return (
     <div
-      className="flex flex-col h-full w-full bg-dark-900 relative overflow-hidden"
+      className="flex flex-col h-full w-full bg-white relative overflow-hidden"
       id="chat-container"
     >
       {/* ── Header ─────────────────────────────────────────────── */}

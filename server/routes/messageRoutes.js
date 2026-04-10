@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 const Message = require("../models/Message");
 const User = require("../models/User");
+const mongoose = require("mongoose");
 const { protect } = require("../middleware/auth");
 
 // Get inbox (all conversations for logged in user)
 router.get("/inbox", protect, async (req, res) => {
   try {
-    const currentUserId = req.user.id;
+    const currentUserId = req.user._id.toString();
 
     // 1. Find all messages where room contains the current user's ID
     const userMessages = await Message.find({ room: { $regex: currentUserId } })
@@ -29,7 +30,7 @@ router.get("/inbox", protect, async (req, res) => {
         const partnerId = ids.find(id => id !== currentUserId) || currentUserId; // Fallback to SELF if chatting with self
         
         let partnerData = null;
-        if (partnerId) {
+        if (partnerId && mongoose.Types.ObjectId.isValid(partnerId)) {
           const partner = await User.findById(partnerId).select('name avatar role');
           if (partner) {
             partnerData = {

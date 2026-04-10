@@ -3,15 +3,15 @@ import { Link } from 'react-router-dom';
 import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { HiCalendar, HiClock, HiLocationMarker, HiX } from 'react-icons/hi';
+import { HiCalendar, HiClock, HiLocationMarker, HiX, HiCheckCircle, HiChatAlt2 } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
 const statusColors = {
-  pending: 'badge-pending',
-  accepted: 'badge-accepted',
-  rejected: 'badge-rejected',
-  completed: 'badge-completed',
-  cancelled: 'badge-cancelled',
+  pending: 'bg-amber-50 text-amber-600 border-amber-200',
+  accepted: 'bg-blue-50 text-blue-600 border-blue-200',
+  rejected: 'bg-red-50 text-red-600 border-red-200',
+  completed: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+  cancelled: 'bg-gray-100 text-gray-500 border-gray-200',
 };
 
 const CustomerDashboard = () => {
@@ -46,82 +46,120 @@ const CustomerDashboard = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-white">My Dashboard</h1>
-          <p className="text-dark-200 mt-1">Welcome back, {user?.name}</p>
-        </div>
-        <Link to="/services" className="btn-primary text-sm">
-          Browse Services
-        </Link>
-      </div>
-
-      <h2 className="text-xl font-semibold text-white mb-4">My Bookings</h2>
-
-      {loading ? (
-        <div className="py-12"><LoadingSpinner text="Loading bookings..." /></div>
-      ) : bookings.length === 0 ? (
-        <div className="card text-center py-12">
-          <div className="text-5xl mb-3">📋</div>
-          <h3 className="text-lg font-semibold text-white mb-2">No bookings yet</h3>
-          <p className="text-dark-200 mb-4">Find and book your first service!</p>
-          <Link to="/services" className="btn-primary text-sm inline-block">
+    <div className="bg-[#F5FDFD] min-h-screen pt-8 pb-24 font-sans">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Dashboard Header */}
+        <div className="bg-white p-8 md:p-10 mb-8 rounded-[2rem] shadow-sm border border-[#E0F5F3] flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-[#1A2B2A]">My Dashboard</h1>
+            <p className="text-[#4A5568] mt-2 font-medium">Welcome back, <span className="text-[#45B1A8] font-bold">{user?.name}</span>!</p>
+          </div>
+          <Link to="/services" className="bg-[#45B1A8] text-white px-8 py-3.5 rounded-full font-bold hover:bg-[#3a9990] hover:shadow-lg transition-all duration-300 text-center">
             Browse Services
           </Link>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {bookings.map((booking) => (
-            <div key={booking._id} className="card-glow">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Link
-                      to={`/services/${booking.service?._id}`}
-                      className="text-lg font-semibold text-white hover:text-primary-400 transition-colors"
-                    >
-                      {booking.service?.title || 'Service'}
-                    </Link>
-                    <span className={statusColors[booking.status]}>
-                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                    </span>
+
+        <div className="flex items-center justify-between mb-6 px-2">
+          <h2 className="text-2xl font-bold text-[#1A2B2A]">My Bookings</h2>
+          <span className="bg-[#E0F5F3] text-[#45B1A8] px-3 py-1 rounded-full text-sm font-bold">
+            {bookings.length} {bookings.length === 1 ? 'Booking' : 'Bookings'}
+          </span>
+        </div>
+
+        {loading ? (
+          <div className="py-20 flex justify-center bg-white rounded-[2rem] border border-[#E0F5F3] shadow-sm">
+            <LoadingSpinner text="Loading your bookings..." />
+          </div>
+        ) : bookings.length === 0 ? (
+          <div className="bg-white text-center py-20 px-4 rounded-[2.5rem] border border-[#E0F5F3] border-dashed shadow-sm">
+            <div className="w-20 h-20 bg-[#F5FDFD] rounded-full flex items-center justify-center mx-auto mb-6 border border-[#E0F5F3]">
+              <HiCalendar className="w-10 h-10 text-[#45B1A8]" />
+            </div>
+            <h3 className="text-2xl font-extrabold text-[#1A2B2A] mb-3">No bookings yet!</h3>
+            <p className="text-[#4A5568] mb-8 font-medium max-w-sm mx-auto">You haven't scheduled any services. Find a trusted professional and book your first service today!</p>
+            <Link to="/services" className="bg-[#1A2B2A] text-white px-10 py-4 rounded-full font-bold hover:bg-black transition-colors shadow-md">
+              Explore Services
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-6">
+            {bookings.map((booking) => (
+              <div key={booking._id} className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E0F5F3] shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+                  
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-3 mb-4">
+                      <Link
+                        to={`/services/${booking.service?._id}`}
+                        className="text-xl sm:text-2xl font-black text-[#1A2B2A] hover:text-[#45B1A8] transition-colors line-clamp-1"
+                      >
+                        {booking.service?.title || 'Unknown Service'}
+                      </Link>
+                      <span className={`px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wide border ${statusColors[booking.status]}`}>
+                        {booking.status}
+                      </span>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-y-3 gap-x-6 text-sm font-medium text-[#4A5568] mb-6 bg-[#F5FDFD] p-5 rounded-2xl border border-[#E0F5F3]">
+                      <span className="flex items-center gap-2">
+                        <HiCalendar className="w-5 h-5 text-[#45B1A8]" />
+                        {new Date(booking.date).toLocaleDateString(undefined, {weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'})}
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <HiClock className="w-5 h-5 text-[#45B1A8]" />
+                        {booking.time}
+                      </span>
+                      <span className="flex items-start gap-2 sm:col-span-2">
+                        <HiLocationMarker className="w-5 h-5 text-[#45B1A8] shrink-0 mt-0.5" />
+                        <span className="line-clamp-2">{booking.address}</span>
+                      </span>
+                    </div>
+
+                    {booking.provider && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-[#E0F5F3] rounded-full flex items-center justify-center text-[#45B1A8] font-bold border border-[#45B1A8]/20">
+                          {booking.provider.name?.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase tracking-wider font-bold text-gray-400 mb-0.5">Assigned Professional</p>
+                          <p className="text-sm font-bold text-[#1A2B2A]">{booking.provider.name}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex flex-wrap gap-4 text-sm text-dark-200">
-                    <span className="flex items-center gap-1">
-                      <HiCalendar className="w-4 h-4" />
-                      {new Date(booking.date).toLocaleDateString()}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <HiClock className="w-4 h-4" />
-                      {booking.time}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <HiLocationMarker className="w-4 h-4" />
-                      {booking.address}
-                    </span>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex sm:flex-col items-center justify-end gap-3 shrink-0 pt-4 sm:pt-0 border-t border-gray-100 sm:border-0 w-full sm:w-auto mt-4 sm:mt-0">
+                    
+                    {booking.provider && (
+                      <Link
+                        to={`/chat/${booking.provider._id}`}
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-[#1A2B2A] border border-gray-200 px-6 py-2.5 rounded-full font-bold text-sm hover:bg-gray-50 transition-colors shadow-sm"
+                      >
+                        <HiChatAlt2 className="w-4 h-4 text-[#45B1A8]" /> Message Pro
+                      </Link>
+                    )}
+
+                    {(booking.status === 'pending' || booking.status === 'accepted') ? (
+                      <button
+                        onClick={() => cancelBooking(booking._id)}
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-50 text-red-500 border border-red-100 px-6 py-2.5 rounded-full font-bold text-sm hover:bg-red-500 hover:text-white transition-colors"
+                      >
+                        <HiX className="w-4 h-4" /> Cancel Booking
+                      </button>
+                    ) : booking.status === 'completed' ? (
+                      <Link to={`/services/${booking.service?._id}`} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#E0F5F3] text-[#45B1A8] px-6 py-2.5 rounded-full font-bold text-sm hover:bg-[#45B1A8] hover:text-white transition-colors">
+                        <HiCheckCircle className="w-4 h-4" /> Leave Review
+                      </Link>
+                    ) : null}
                   </div>
-                  {booking.provider && (
-                    <p className="text-sm text-dark-100 mt-2">
-                      Provider: <span className="text-white">{booking.provider.name}</span>
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {(booking.status === 'pending' || booking.status === 'accepted') && (
-                    <button
-                      onClick={() => cancelBooking(booking._id)}
-                      className="btn-danger text-sm !py-2 !px-3 flex items-center gap-1"
-                    >
-                      <HiX className="w-4 h-4" /> Cancel
-                    </button>
-                  )}
+
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,174 +1,297 @@
 import { Link } from 'react-router-dom';
-import { HiSearch, HiArrowRight, HiShieldCheck, HiClock, HiStar } from 'react-icons/hi';
-import {
-  HiWrenchScrewdriver, HiBolt, HiSparkles, HiPaintBrush,
-  HiCube, HiCog6Tooth, HiAcademicCap
+import { useAuth } from '../context/AuthContext';
+import { useRef, useState } from 'react';
+import { HiArrowRight, HiArrowLeft } from 'react-icons/hi';
+
+import { 
+  HiWrenchScrewdriver, HiBolt, HiSparkles, HiPaintBrush, 
+  HiUser, HiOutlineSparkles, HiScissors, HiOutlineUser, HiHeart 
 } from 'react-icons/hi2';
 
-const categories = [
-  { name: 'Plumber', slug: 'plumber', icon: HiWrenchScrewdriver, color: 'from-blue-500 to-cyan-500' },
-  { name: 'Electrician', slug: 'electrician', icon: HiBolt, color: 'from-yellow-500 to-orange-500' },
-  { name: 'Cleaner', slug: 'cleaner', icon: HiSparkles, color: 'from-emerald-500 to-teal-500' },
-  { name: 'Painter', slug: 'painter', icon: HiPaintBrush, color: 'from-purple-500 to-pink-500' },
-  { name: 'Carpenter', slug: 'carpenter', icon: HiCube, color: 'from-amber-600 to-yellow-600' },
-  { name: 'Mechanic', slug: 'mechanic', icon: HiCog6Tooth, color: 'from-red-500 to-rose-500' },
-  { name: 'Tutor', slug: 'tutor', icon: HiAcademicCap, color: 'from-indigo-500 to-violet-500' },
+import LocationSearchBar from '../components/home/LocationSearchBar';
+import PromoBanner from '../components/home/PromoBanner';
+import CategoryGrid from '../components/home/CategoryGrid';
+import ServiceCardDetailed from '../components/home/ServiceCardDetailed';
+import SectionHeader from '../components/home/SectionHeader';
+
+// --- (Note: Keep the other imports and code outside the chunk as they were. This chunk handles the Carousel Component and fixes data array URLs)
+
+const personalServices = [
+  { name: 'Salon for Women', slug: 'salon', icon: HiUser, iconColor: 'text-purple-600' },
+  { name: 'Spa for Women', slug: 'spa', icon: HiOutlineSparkles, iconColor: 'text-pink-500' },
+  { name: 'Hair & Skin', slug: 'beauty', icon: HiScissors, iconColor: 'text-orange-500', isNew: true },
+  { name: 'Salon for Men', slug: 'mens-salon', icon: HiOutlineUser, iconColor: 'text-blue-600' },
+  { name: 'Massage for Men', slug: 'massage', icon: HiHeart, iconColor: 'text-rose-500' },
 ];
 
-const Home = () => {
+const homeServices = [
+  { name: 'Electrical & Plumbing', slug: 'electrician', icon: HiBolt, iconColor: 'text-yellow-600' },
+  { name: 'Cleaning & Pest', slug: 'cleaner', icon: HiSparkles, iconColor: 'text-emerald-500' },
+  { name: 'Home Repairs', slug: 'carpenter', icon: HiWrenchScrewdriver, iconColor: 'text-gray-700' },
+  { name: 'Home Painting', slug: 'painter', icon: HiPaintBrush, iconColor: 'text-blue-500', isNew: true },
+  { name: 'Appliance Repair', slug: 'mechanic', icon: HiWrenchScrewdriver, iconColor: 'text-indigo-500' },
+];
+
+const applianceOriginalData = [
+  {
+    name: 'Foam-jet service (2 ACs)',
+    slug: 'mechanic',
+    tag: '2 ACs',
+    isSafe: true,
+    rating: '4.76',
+    isInstant: true,
+    price: '1,248',
+    originalPrice: '1,298',
+    image: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    name: 'AC repair',
+    slug: 'mechanic',
+    isSafe: false,
+    rating: '4.74',
+    isInstant: true,
+    price: '299',
+    originalPrice: null,
+    image: 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    name: 'Automatic top load machine check-up',
+    slug: 'mechanic',
+    isSafe: false,
+    rating: '4.77',
+    isInstant: false,
+    price: '199',
+    originalPrice: null,
+    image: 'https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    name: 'Semi-automatic machine check-up',
+    slug: 'mechanic',
+    isSafe: false,
+    rating: '4.75',
+    isInstant: false,
+    price: '199',
+    originalPrice: null,
+    image: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    name: 'Water purifier check-up',
+    slug: 'plumber',
+    isSafe: false,
+    rating: '4.78',
+    isInstant: false,
+    price: '299',
+    originalPrice: null,
+    image: '/water-purifier.jpg'
+  }
+];
+
+const homeRepairData = [
+  {
+    name: 'Washbasin pipe repair',
+    slug: 'plumber',
+    isSafe: true,
+    rating: '4.82',
+    isInstant: true,
+    price: '149',
+    originalPrice: null,
+    image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    name: 'Wall art frame hanging',
+    slug: 'carpenter',
+    isSafe: false,
+    rating: '4.70',
+    isInstant: false,
+    price: '249',
+    originalPrice: '299',
+    image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    name: 'Socket replacement',
+    slug: 'electrician',
+    isSafe: false,
+    rating: '4.85',
+    isInstant: true,
+    price: '99',
+    originalPrice: null,
+    image: 'https://images.unsplash.com/photo-1517420879524-86d64ac2f339?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    name: 'Ceiling fan repair',
+    slug: 'electrician',
+    isSafe: false,
+    rating: '4.75',
+    isInstant: false,
+    price: '349',
+    originalPrice: null,
+    image: '/ceiling-fan-repair.jpg'
+  }
+];
+
+// Carousel Row Component for rendering detailed card rows
+const DetailedServiceCarousel = ({ title, data, linkTo }) => {
+  const scrollRef = useRef(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setShowLeftArrow(scrollLeft > 10);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const scrollLeftClick = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -600, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRightClick = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 600, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-900/20 via-dark-900 to-dark-900"></div>
-        <div className="absolute top-20 left-1/4 w-72 h-72 bg-primary-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl"></div>
+    <div className="mb-20">
+      <SectionHeader title={title} linkTo={linkTo} />
+      <div className="relative group">
+        
+        {/* Left Arrow */}
+        {showLeftArrow && (
+          <div 
+            onClick={scrollLeftClick}
+            className="hidden sm:flex absolute left-0 top-[40%] -translate-y-1/2 ml-2 w-12 h-12 items-center justify-center bg-white shadow-lg shadow-black/10 rounded-full cursor-pointer hover:bg-gray-50 border border-gray-100 z-20 transition-all opacity-0 group-hover:opacity-100"
+          >
+            <HiArrowLeft className="w-5 h-5 text-gray-800" />
+          </div>
+        )}
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-28">
-          <div className="text-center animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/20 text-primary-400 text-sm font-medium mb-6">
-              <HiShieldCheck className="w-4 h-4" />
-              Trusted by thousands of customers
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex overflow-x-auto gap-4 px-4 pb-8 hide-scrollbar snap-x snap-mandatory scroll-smooth"
+        >
+          {data.map((item, idx) => (
+            <div className="snap-start" key={idx}>
+              <ServiceCardDetailed service={item} />
             </div>
+          ))}
+          {/* Faux trailing space to ensure last item can scroll fully into view */}
+          <div className="w-8 shrink-0 sm:w-16"></div>
+        </div>
+        
+        {/* Right Arrow */}
+        {showRightArrow && (
+          <div 
+            onClick={scrollRightClick}
+            className="hidden sm:flex absolute right-0 top-[40%] -translate-y-1/2 mr-2 w-12 h-12 items-center justify-center bg-white shadow-lg shadow-black/10 rounded-full cursor-pointer hover:bg-gray-50 border border-gray-100 z-20 transition-all opacity-0 group-hover:opacity-100"
+          >
+            <HiArrowRight className="w-5 h-5 text-gray-800" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
-              Find Local Services
-              <br />
-              <span className="bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-                Around You
-              </span>
-            </h1>
 
-            <p className="text-lg sm:text-xl text-dark-100 max-w-2xl mx-auto mb-10">
-              Connect with verified plumbers, electricians, cleaners, and more.
-              Book trusted professionals in your area with just a few clicks.
-            </p>
+const Home = () => {
+  const { user } = useAuth();
 
-            {/* Search Bar */}
-            <div className="max-w-xl mx-auto px-8 sm:px-4">
-              <Link
-                to="/services"
-                className="flex items-center gap-3 glass px-5 py-4 cursor-pointer
-                  hover:border-primary-500/30 transition-all duration-300 group"
-              >
-                <HiSearch className="w-5 h-5 text-dark-200 group-hover:text-primary-400 transition-colors" />
-                {/* <span className="text-dark-200 flex-1 text-left">Search for a service or category...</span> */}
-                <span className="text-dark-200 flex-1 text-left">
-                  <span className="block sm:hidden">Search for a service</span>
-                  <span className="hidden sm:block">Search for a service or category...</span>
-                </span>
-                <span className="btn-primary !py-2 !px-4 text-sm flex items-center gap-1">
-                  Search <HiArrowRight className="w-4 h-4" />
-                </span>
+  return (
+    <div className="bg-white min-h-screen">
+      {/* 
+        1. Location and Search Header 
+        - Hide on desktop (md:) because Navbar now handles it on desktop.
+      */}
+      <div className="md:hidden">
+        <LocationSearchBar />
+      </div>
+
+      <div className="max-w-[1240px] mx-auto pb-24 xl:px-8 pt-2">
+        <div className="md:grid md:grid-cols-2 md:gap-6 md:mt-8 mb-6">
+          <PromoBanner type="hero" userName={user ? user.name.split(' ')[0] : 'Guest'} />
+          <div className="hidden md:flex flex-col gap-4">
+            {/* Additional desktop banner to balance layout */}
+            <PromoBanner type="placeholder" userName="Offers" />
+            
+            {/* New Minimal Offer Card added below the placeholder */}
+            <div className="mx-4 md:mx-0 bg-gradient-to-r from-[#F3F1FF] to-[#FDFBFF] rounded-2xl p-5 shadow-sm border border-[#6D5AE6]/10 flex items-center justify-between transition-all hover:shadow-md">
+              <div>
+                <h3 className="text-gray-900 font-bold text-[15px] mb-0.5">Get 20% OFF</h3>
+                <p className="text-gray-500 text-[13px] font-medium">On your first service booking</p>
+              </div>
+              <Link to="/services" className="text-[#6D5AE6] text-sm font-semibold hover:text-[#5a48d1] flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-[#6D5AE6]/10 shadow-sm transition-colors">
+                Claim Offer <HiArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Categories Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-white mb-3">Browse by Category</h2>
-          <p className="text-dark-200">Choose from our wide range of local services</p>
+        <div className="md:hidden">
+            <PromoBanner type="plus" />
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {categories.map((cat, index) => (
-            <Link
-              key={cat.slug}
-              to={`/services?category=${cat.slug}`}
-              className="card-glow text-center group"
-              style={{ animationDelay: `${index * 0.05}s` }}
-            >
-              <div className={`w-14 h-14 mx-auto mb-3 rounded-xl bg-gradient-to-br ${cat.color}
-                flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                <cat.icon className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-sm font-semibold text-white group-hover:text-primary-400 transition-colors">
-                {cat.name}
-              </h3>
-            </Link>
-          ))}
-        </div>
-      </section>
+        <div className="h-px bg-gray-100 mx-4 my-6 block md:hidden" />
 
-      {/* How It Works */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-white mb-3">How It Works</h2>
-          <p className="text-dark-200">Get started in 3 simple steps</p>
+        {/* 2. Category Grids */}
+        <div className="mb-8">
+          <CategoryGrid title="Personal Services" items={personalServices} />
+          <div className="h-4 bg-gray-50 my-2 md:hidden" />
+          <CategoryGrid title="Home Services" items={homeServices} />
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {[
-            {
-              step: '01',
-              icon: HiSearch,
-              title: 'Search',
-              desc: 'Browse our extensive list of verified local service providers by category or location.',
-            },
-            {
-              step: '02',
-              icon: HiClock,
-              title: 'Book',
-              desc: 'Choose your preferred time slot and book the service in seconds.',
-            },
-            {
-              step: '03',
-              icon: HiStar,
-              title: 'Review',
-              desc: 'After the service is completed, leave a rating and review to help others.',
-            },
-          ].map((item, index) => (
-            <div
-              key={item.step}
-              className="relative card text-center animate-slide-up"
-              style={{ animationDelay: `${index * 0.15}s` }}
-            >
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary-600 rounded-full text-xs font-bold">
-                Step {item.step}
+        {/* 3. Original Provider CTA mapped to Top/Mid content for providers */}
+        {!user || user.role !== 'provider' ? (
+          <section className="px-4 py-8 mb-4">
+            <div className="bg-gradient-to-r from-[#F3F1FF] to-white rounded-2xl p-6 md:p-10 flex flex-col md:flex-row items-center justify-between border border-[#6D5AE6]/10 shadow-sm">
+              <div className="text-center md:text-left mb-6 md:mb-0">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                  Are You a Service Provider?
+                </h2>
+                <p className="text-gray-600 text-sm md:text-base max-w-md">
+                  Join thousands of professionals. Grow your business, manage bookings, and connect with customers.
+                </p>
               </div>
-              <div className="w-16 h-16 mx-auto mt-4 mb-4 rounded-2xl bg-primary-500/10 flex items-center justify-center">
-                <item.icon className="w-8 h-8 text-primary-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
-              <p className="text-sm text-dark-100">{item.desc}</p>
+              <Link
+                to="/provider/register"
+                className="inline-flex items-center justify-center gap-2 bg-[#6D5AE6] hover:bg-[#5a48d1] text-white px-8 py-4 rounded-xl font-bold transition-colors w-full md:w-auto shadow-md"
+              >
+                Register as Provider <HiArrowRight className="w-5 h-5" />
+              </Link>
             </div>
-          ))}
-        </div>
-      </section>
+          </section>
+        ) : null}
 
-      {/* CTA */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="glass p-10 sm:p-14 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary-600/10 to-primary-900/10"></div>
-          <div className="relative">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Are You a Service Provider?
-            </h2>
-            <p className="text-dark-100 mb-8 max-w-xl mx-auto">
-              Join thousands of professionals on Around-You. Grow your business, manage bookings, and connect with customers in your area.
-            </p>
-            <Link
-              to="/register"
-              className="btn-primary text-base inline-flex items-center gap-2"
-            >
-              Register as Provider <HiArrowRight className="w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-      </section>
+        {/* 4. Desktop Specific UI Layouts (Detailed Rows) */}
+        <DetailedServiceCarousel 
+          title="Appliance repair & check-ups" 
+          data={applianceOriginalData} 
+          linkTo="/services?category=mechanic" 
+        />
 
-      {/* Footer */}
-      <footer className="border-t border-dark-500 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-dark-200 text-sm">
-            © {new Date().getFullYear()} Around-You. All rights reserved.
-          </p>
-        </div>
-      </footer>
+        <DetailedServiceCarousel 
+          title="Home repair & installation" 
+          data={homeRepairData} 
+          linkTo="/services?category=electrician" 
+        />
+
+
+        {/* Add custom style block to hide scrollbar for the horizontal scrolling areas */}
+        <style dangerouslySetInnerHTML={{__html: `
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        `}} />
+      </div>
     </div>
   );
 };
