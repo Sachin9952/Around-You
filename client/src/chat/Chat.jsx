@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback, useMemo } from "react"
 import { io } from "socket.io-client";
 import { AnimatePresence, motion } from "framer-motion";
 import { HiChevronDown } from "react-icons/hi2";
+import { HiSignal, HiSignalSlash } from "react-icons/hi2";
 import MessageBubble from "./MessageBubble";
 import InputBox from "./InputBox";
 import ChatHeader from "./ChatHeader";
@@ -64,6 +65,12 @@ function getSocket() {
     _socket = io(import.meta.env.VITE_API_URL || "http://localhost:5000", {
       autoConnect: false,
       auth: { token },
+      transports: ["websocket", "polling"],   // Explicit transport order
+      reconnection: true,                      // Enable auto-reconnection
+      reconnectionAttempts: 15,                // Retry up to 15 times
+      reconnectionDelay: 1000,                 // Start with 1 s delay
+      reconnectionDelayMax: 5000,              // Max 5 s between retries
+      timeout: 20000,                          // 20 s timeout (covers Render cold starts)
     });
   }
   return _socket;
@@ -97,6 +104,8 @@ const Chat = ({
   const [messages, setMessages] = useState(useDummy ? DUMMY_MESSAGES : []);
   const [isTyping, setIsTyping] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  // "connected" | "connecting" | "disconnected" | "error"
+  const [connectionStatus, setConnectionStatus] = useState(useDummy ? "connected" : "connecting");
 
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
@@ -107,10 +116,10 @@ const Chat = ({
     if (useDummy) return;
 
     const socket = getSocket();
+    setConnectionStatus("connecting");
     socket.connect();
-    socket.emit("join_room", roomId);
 
-    // Fetch chat history
+    // Fetch chat history (HTTP — works even during socket reconnection)
     const fetchMessages = async () => {
       try {
         const res = await API.get(`/messages/${roomId}`);
@@ -122,16 +131,53 @@ const Chat = ({
     };
     fetchMessages();
 
-    // Listen for incoming messages
+    // ── Connection lifecycle listeners ──────────────────────────────
+    const handleConnect = () => {
+      console.log("✅ Socket connected:", socket.id);
+      setConnectionStatus("connected");
+      socket.emit("join_room", roomId); // (re-)join room on every connect
+    };
+
+    const handleDisconnect = (reason) => {
+      console.warn("⚠️ Socket disconnected:", reason);
+      setConnectionStatus("disconnected");
+    };
+
+    const handleConnectError = (err) => {
+      console.error("❌ Socket connection error:", err.message);
+      setConnectionStatus("error");
+    };
+
+    const handleReconnectAttempt = (attempt) => {
+      console.log(`🔄 Reconnection attempt ${attempt}…`);
+      setConnectionStatus("connecting");
+    };
+
+    const handleReconnect = (attempt) => {
+      console.log(`✅ Reconnected after ${attempt} attempt(s)`);
+      // Re-join the room after reconnection
+      socket.emit("join_room", roomId);
+    };
+
+    // If already connected (module-level singleton), join immediately
+    if (socket.connected) {
+      handleConnect();
+    }
+
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleConnectError);
+    socket.io.on("reconnect_attempt", handleReconnectAttempt);
+    socket.io.on("reconnect", handleReconnect);
+
+    // ── Message & typing listeners ─────────────────────────────────
     const handleReceive = (data) => {
       setMessages((prev) => [...prev, data]);
     };
 
-    // Listen for typing events
     const handleTyping = (data) => {
       if (data.senderId !== userId) {
         setIsTyping(true);
-        // Auto-clear after 2s of no typing events
         clearTimeout(typingTimeoutRef.current);
         typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 2000);
       }
@@ -148,6 +194,11 @@ const Chat = ({
     socket.on("user_stop_typing", handleStopTyping);
 
     return () => {
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleConnectError);
+      socket.io.off("reconnect_attempt", handleReconnectAttempt);
+      socket.io.off("reconnect", handleReconnect);
       socket.off("receive_message", handleReceive);
       socket.off("user_typing", handleTyping);
       socket.off("user_stop_typing", handleStopTyping);
@@ -279,6 +330,35 @@ const Chat = ({
         isOnline={partnerOnline}
         onBack={onBack}
       />
+
+      {/* ── Connection status banner ────────────────────────────── */}
+      <AnimatePresence>
+        {connectionStatus !== "connected" && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className={`flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold tracking-wide overflow-hidden ${
+              connectionStatus === "connecting"
+                ? "bg-amber-50 text-amber-700 border-b border-amber-200"
+                : "bg-red-50 text-red-600 border-b border-red-200"
+            }`}
+          >
+            {connectionStatus === "connecting" ? (
+              <>
+                <span className="w-3 h-3 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                Connecting to server…
+              </>
+            ) : (
+              <>
+                <HiSignalSlash className="w-4 h-4" />
+                Connection lost — retrying automatically…
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Messages area ──────────────────────────────────────── */}
       <div

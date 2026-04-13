@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
@@ -25,6 +26,22 @@ import Notifications from './pages/Notifications';
 import Footer from './components/Footer';
 
 function App() {
+  // ── Keep the Render backend alive (free tier sleeps after 15 min) ──
+  useEffect(() => {
+    const API_URL = import.meta.env.VITE_API_URL;
+    if (!API_URL) return;
+
+    // Ping immediately on mount so the server wakes up early
+    fetch(`${API_URL}/api/health`).catch(() => {});
+
+    // Then ping every 14 minutes to keep it awake
+    const keepAlive = setInterval(() => {
+      fetch(`${API_URL}/api/health`).catch(() => {});
+    }, 14 * 60 * 1000);
+
+    return () => clearInterval(keepAlive);
+  }, []);
+
   return (
     <Router>
       <AuthProvider>
