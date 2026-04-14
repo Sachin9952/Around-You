@@ -103,6 +103,14 @@ exports.deleteUser = async (req, res, next) => {
       return next(new ErrorResponse('You cannot delete your own account', 400));
     }
 
+    // If deleting a provider, soft-archive their services
+    if (user.role === 'provider') {
+      await Service.updateMany(
+        { provider: user._id },
+        { isActive: false, isArchived: true, providerDeleted: true }
+      );
+    }
+
     await user.deleteOne();
 
     res.status(200).json({
@@ -119,12 +127,13 @@ exports.deleteUser = async (req, res, next) => {
 // @access  Private (Admin)
 exports.getStats = async (req, res, next) => {
   try {
-    const [totalUsers, totalProviders, pendingProviders, totalServices, totalBookings] =
+    const [totalUsers, totalProviders, pendingProviders, activeServices, archivedServices, totalBookings] =
       await Promise.all([
         User.countDocuments({ role: 'customer' }),
         User.countDocuments({ role: 'provider' }),
         User.countDocuments({ role: 'provider', isApproved: false }),
-        Service.countDocuments(),
+        Service.countDocuments({ isActive: true }),
+        Service.countDocuments({ isArchived: true }),
         Booking.countDocuments(),
       ]);
 
@@ -134,7 +143,8 @@ exports.getStats = async (req, res, next) => {
         totalUsers,
         totalProviders,
         pendingProviders,
-        totalServices,
+        totalServices: activeServices,
+        archivedServices,
         totalBookings,
       },
     });

@@ -55,6 +55,18 @@ const serviceSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isArchived: {
+      type: Boolean,
+      default: false,
+    },
+    providerDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    providerDeletedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

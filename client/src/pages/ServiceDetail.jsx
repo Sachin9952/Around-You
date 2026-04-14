@@ -4,7 +4,7 @@ import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import StarRating from '../components/StarRating';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { HiStar, HiLocationMarker, HiCurrencyRupee, HiPhone, HiMail, HiCalendar, HiChatAlt2, HiCheckCircle } from 'react-icons/hi';
+import { HiStar, HiLocationMarker, HiCurrencyRupee, HiPhone, HiMail, HiCalendar, HiChatAlt2, HiCheckCircle, HiExclamation } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
 const categoryImages = {
@@ -145,6 +145,18 @@ const ServiceDetail = () => {
           </div>
           
           <div className="p-8 md:p-12">
+            {/* Archived Service Banner */}
+            {(service.isArchived || service.providerDeleted) && (
+              <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-6 py-4 mb-8">
+                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
+                  <HiExclamation className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-amber-800 font-bold text-sm">This service is no longer available</p>
+                  <p className="text-amber-600 text-xs font-medium">The provider has removed their account. This page is kept for your booking history.</p>
+                </div>
+              </div>
+            )}
             <div className="flex flex-col lg:flex-row lg:items-start gap-10">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-6">
@@ -191,7 +203,7 @@ const ServiceDetail = () => {
               </div>
 
               {/* Book Button (Desktop Placement) */}
-              {user?.role === 'customer' && (
+              {user?.role === 'customer' && !service.isArchived && !service.providerDeleted && (
                 <div className="hidden lg:block mt-8">
                   <button
                     onClick={() => setShowBookingForm(!showBookingForm)}
@@ -205,7 +217,7 @@ const ServiceDetail = () => {
             </div>
 
             {/* Provider Info Card */}
-            {service.provider && (
+            {service.provider ? (
               <div className="lg:w-80 flex-shrink-0 bg-white border-2 border-[#E0F5F3] rounded-[2rem] p-8 shadow-sm">
                 <div className="flex items-center gap-2 mb-6">
                   <HiCheckCircle className="w-5 h-5 text-[#45B1A8]" />
@@ -236,7 +248,7 @@ const ServiceDetail = () => {
                 </div>
 
                 {/* Chat with Provider Button */}
-                {user && user._id !== service.provider._id && (
+                {user && user._id !== service.provider._id && !service.isArchived && (
                   <button
                     className="w-full bg-white border-2 border-[#45B1A8] text-[#45B1A8] hover:bg-[#45B1A8] hover:text-white px-6 py-3 rounded-full font-bold transition-colors inline-flex items-center justify-center gap-2"
                     onClick={() => navigate(`/chat/${service.provider._id}`)}
@@ -246,10 +258,26 @@ const ServiceDetail = () => {
                   </button>
                 )}
               </div>
+            ) : (
+              <div className="lg:w-80 flex-shrink-0 bg-gray-50 border-2 border-gray-200 rounded-[2rem] p-8 shadow-sm">
+                <div className="flex items-center gap-2 mb-6">
+                  <HiExclamation className="w-5 h-5 text-gray-400" />
+                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Service Provider</h3>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-2xl font-black text-gray-300 border border-gray-200">
+                    P
+                  </div>
+                  <div>
+                    <p className="font-extrabold text-xl text-gray-400">Provider unavailable</p>
+                    <span className="text-sm font-medium text-gray-400">Account has been removed</span>
+                  </div>
+                </div>
+              </div>
             )}
             
             {/* Book Button (Mobile Placement) */}
-            {user?.role === 'customer' && (
+            {user?.role === 'customer' && !service.isArchived && !service.providerDeleted && (
               <div className="block lg:hidden w-full mt-4">
                 <button
                   onClick={() => setShowBookingForm(!showBookingForm)}

@@ -3,9 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { useRef, useState } from 'react';
 import { HiArrowRight, HiArrowLeft } from 'react-icons/hi';
 
-import { 
-  HiWrenchScrewdriver, HiBolt, HiSparkles, HiPaintBrush, 
-  HiUser, HiOutlineSparkles, HiScissors, HiOutlineUser, HiHeart 
+import {
+  HiWrenchScrewdriver, HiBolt, HiSparkles, HiPaintBrush,
+  HiUser, HiOutlineSparkles, HiScissors, HiOutlineUser, HiHeart
 } from 'react-icons/hi2';
 
 import LocationSearchBar from '../components/home/LocationSearchBar';
@@ -156,13 +156,47 @@ const DetailedServiceCarousel = ({ title, data, linkTo }) => {
   };
 
   return (
-    <div className="mb-20">
+    <div className="mb-10 md:mb-20">
       <SectionHeader title={title} linkTo={linkTo} />
-      <div className="relative group">
-        
+
+      {/* Mobile: Swipeable carousel showing 2 cards at a time */}
+      <div className="sm:hidden overflow-x-auto hide-scrollbar snap-x snap-mandatory scroll-smooth pb-4">
+        <div
+          className="flex gap-4"
+          style={{ width: `${Math.ceil(data.length / 2) * 100}%` }}
+        >
+          {Array.from({ length: Math.ceil(data.length / 2) }, (_, i) => (
+            <div
+              key={i}
+              className="grid grid-cols-2 gap-3 snap-start"
+              style={{ width: `${100 / Math.ceil(data.length / 2)}%` }}
+            >
+              {data.slice(i * 2, i * 2 + 2).map((item, idx) => {
+                const isVeryFirstCard = i === 0 && idx === 0;
+                const isVeryLastCard =
+                  i === Math.ceil(data.length / 2) - 1 &&
+                  idx === data.slice(i * 2, i * 2 + 2).length - 1;
+
+                return (
+                  <div
+                    key={idx}
+                    className={`${isVeryFirstCard ? "ml-4" : ""} ${isVeryLastCard ? "mr-4" : ""}`}
+                  >
+                    <ServiceCardDetailed service={item} />
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop: Horizontal scroll carousel */}
+      <div className="hidden sm:block relative group">
+
         {/* Left Arrow */}
         {showLeftArrow && (
-          <div 
+          <div
             onClick={scrollLeftClick}
             className="hidden sm:flex absolute left-0 top-[40%] -translate-y-1/2 ml-2 w-12 h-12 items-center justify-center bg-white shadow-lg shadow-black/10 rounded-full cursor-pointer hover:bg-gray-50 border border-gray-100 z-20 transition-all opacity-0 group-hover:opacity-100"
           >
@@ -170,23 +204,25 @@ const DetailedServiceCarousel = ({ title, data, linkTo }) => {
           </div>
         )}
 
-        <div 
+        <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex overflow-x-auto gap-4 px-4 pb-8 hide-scrollbar snap-x snap-mandatory scroll-smooth"
+          className="flex overflow-x-auto gap-4 pb-8 hide-scrollbar snap-x snap-mandatory scroll-smooth"
         >
+          {/* Leading spacer for left margin */}
+          <div className="w-4 shrink-0"></div>
           {data.map((item, idx) => (
             <div className="snap-start" key={idx}>
               <ServiceCardDetailed service={item} />
             </div>
           ))}
-          {/* Faux trailing space to ensure last item can scroll fully into view */}
-          <div className="w-8 shrink-0 sm:w-16"></div>
+          {/* Trailing space to ensure last item can scroll fully into view */}
+          <div className="w-16 shrink-0"></div>
         </div>
-        
+
         {/* Right Arrow */}
         {showRightArrow && (
-          <div 
+          <div
             onClick={scrollRightClick}
             className="hidden sm:flex absolute right-0 top-[40%] -translate-y-1/2 mr-2 w-12 h-12 items-center justify-center bg-white shadow-lg shadow-black/10 rounded-full cursor-pointer hover:bg-gray-50 border border-gray-100 z-20 transition-all opacity-0 group-hover:opacity-100"
           >
@@ -218,7 +254,7 @@ const Home = () => {
           <div className="hidden md:flex flex-col gap-4">
             {/* Additional desktop banner to balance layout */}
             <PromoBanner type="placeholder" userName="Offers" />
-            
+
             {/* New Minimal Offer Card added below the placeholder */}
             <div className="mx-4 md:mx-0 bg-gradient-to-r from-[#F3F1FF] to-[#FDFBFF] rounded-2xl p-5 shadow-sm border border-[#6D5AE6]/10 flex items-center justify-between transition-all hover:shadow-md">
               <div>
@@ -233,7 +269,7 @@ const Home = () => {
         </div>
 
         <div className="md:hidden">
-            <PromoBanner type="plus" />
+          <PromoBanner type="plus" />
         </div>
 
         <div className="h-px bg-gray-100 mx-4 my-6 block md:hidden" />
@@ -268,21 +304,22 @@ const Home = () => {
         ) : null}
 
         {/* 4. Desktop Specific UI Layouts (Detailed Rows) */}
-        <DetailedServiceCarousel 
-          title="Appliance repair & check-ups" 
-          data={applianceOriginalData} 
-          linkTo="/services?category=mechanic" 
+        <DetailedServiceCarousel
+          title="Appliance repair & check-ups"
+          data={applianceOriginalData}
+          linkTo="/services?category=mechanic"
         />
 
-        <DetailedServiceCarousel 
-          title="Home repair & installation" 
-          data={homeRepairData} 
-          linkTo="/services?category=electrician" 
+        <DetailedServiceCarousel
+          title="Home repair & installation"
+          data={homeRepairData}
+          linkTo="/services?category=electrician"
         />
 
 
         {/* Add custom style block to hide scrollbar for the horizontal scrolling areas */}
-        <style dangerouslySetInnerHTML={{__html: `
+        <style dangerouslySetInnerHTML={{
+          __html: `
           .hide-scrollbar::-webkit-scrollbar {
             display: none;
           }

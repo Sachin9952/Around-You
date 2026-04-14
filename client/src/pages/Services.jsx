@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import API from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { HiSearch, HiStar, HiLocationMarker, HiArrowRight } from 'react-icons/hi';
+import toast from 'react-hot-toast';
 
 const categoryImages = {
   plumber: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=800&q=80',
@@ -19,6 +21,8 @@ const categories = ['plumber', 'electrician', 'cleaner', 'painter', 'carpenter',
 
 const Services = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
@@ -155,7 +159,7 @@ const Services = () => {
           <>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
               {services.map(service => (
-                <Link to={`/services/${service._id}`} key={service._id} className="group flex flex-col bg-white border border-[#E0F5F3] rounded-[2rem] transition-all duration-300 hover:shadow-[0_20px_40px_rgb(69,177,168,0.12)] hover:-translate-y-1 relative overflow-hidden">
+                <div onClick={() => { if (!isAuthenticated) { toast('Please login to view service details', { icon: '🔒' }); navigate('/login'); return; } navigate(`/services/${service._id}`); }} key={service._id} className="group flex flex-col bg-white border border-[#E0F5F3] rounded-[2rem] transition-all duration-300 hover:shadow-[0_20px_40px_rgb(69,177,168,0.12)] hover:-translate-y-1 relative overflow-hidden cursor-pointer">
                   {/* Service Image Cover */}
                   <div className="h-48 w-full overflow-hidden relative">
                     <img 
@@ -196,7 +200,7 @@ const Services = () => {
                       </div>
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
 

@@ -1,7 +1,5 @@
 const User = require('../models/User');
 const Service = require('../models/Service');
-
-const Review = require('../models/Review');
 const ErrorResponse = require('../utils/errorResponse');
 
 // Helper: send token response
@@ -212,19 +210,13 @@ exports.deleteAccount = async (req, res, next) => {
       return next(new ErrorResponse('Incorrect password', 401));
     }
 
-    // If user is a provider, cascade-delete their services and related data
+    // If user is a provider, soft-archive their services (keep data for history)
     if (user.role === 'provider') {
-      // Find all service IDs owned by this provider
-      const services = await Service.find({ provider: user._id }).select('_id');
-      const serviceIds = services.map((s) => s._id);
-
-      if (serviceIds.length > 0) {
-        // Delete all reviews linked to those services
-        await Review.deleteMany({ service: { $in: serviceIds } });
-
-        // Delete the services themselves
-        await Service.deleteMany({ provider: user._id });
-      }
+      await Service.updateMany(
+        { provider: user._id },
+        { isActive: false, isArchived: true, providerDeleted: true, providerDeletedAt: new Date() }
+      );
+      // Reviews are preserved — they reference services that still exist in DB
     }
 
     // Bookings are preserved for history — not deleted

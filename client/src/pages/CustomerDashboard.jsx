@@ -90,11 +90,16 @@ const CustomerDashboard = () => {
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-3 mb-4">
                       <Link
-                        to={`/services/${booking.service?._id}`}
+                        to={booking.service?._id ? `/services/${booking.service._id}` : '#'}
                         className="text-xl sm:text-2xl font-black text-[#1A2B2A] hover:text-[#45B1A8] transition-colors line-clamp-1"
                       >
-                        {booking.service?.title || 'Unknown Service'}
+                        {booking.service?.title || booking.serviceTitle || 'Service unavailable'}
                       </Link>
+                      {(booking.service?.isArchived || booking.service?.providerDeleted) && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-gray-100 text-gray-500 border border-gray-200">
+                          No longer available
+                        </span>
+                      )}
                       <span className={`px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wide border ${statusColors[booking.status]}`}>
                         {booking.status}
                       </span>
@@ -115,14 +120,24 @@ const CustomerDashboard = () => {
                       </span>
                     </div>
 
-                    {booking.provider && (
+                    {booking.provider ? (
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-[#E0F5F3] rounded-full flex items-center justify-center text-[#45B1A8] font-bold border border-[#45B1A8]/20">
-                          {booking.provider.name?.charAt(0).toUpperCase()}
+                          {(booking.provider.name || booking.providerName || 'P').charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <p className="text-xs uppercase tracking-wider font-bold text-gray-400 mb-0.5">Assigned Professional</p>
-                          <p className="text-sm font-bold text-[#1A2B2A]">{booking.provider.name}</p>
+                          <p className="text-sm font-bold text-[#1A2B2A]">{booking.provider.name || booking.providerName || 'Provider unavailable'}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 font-bold border border-gray-200">
+                          P
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase tracking-wider font-bold text-gray-400 mb-0.5">Assigned Professional</p>
+                          <p className="text-sm font-medium text-gray-400 italic">{booking.providerName || 'Provider unavailable'}</p>
                         </div>
                       </div>
                     )}
@@ -131,7 +146,7 @@ const CustomerDashboard = () => {
                   {/* Action Buttons */}
                   <div className="flex sm:flex-col items-center justify-end gap-3 shrink-0 pt-4 sm:pt-0 border-t border-gray-100 sm:border-0 w-full sm:w-auto mt-4 sm:mt-0">
                     
-                    {booking.provider && (
+                    {booking.provider?._id && (
                       <Link
                         to={`/chat/${booking.provider._id}`}
                         className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-[#1A2B2A] border border-gray-200 px-6 py-2.5 rounded-full font-bold text-sm hover:bg-gray-50 transition-colors shadow-sm"
@@ -147,8 +162,8 @@ const CustomerDashboard = () => {
                       >
                         <HiX className="w-4 h-4" /> Cancel Booking
                       </button>
-                    ) : booking.status === 'completed' ? (
-                      <Link to={`/services/${booking.service?._id}`} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#E0F5F3] text-[#45B1A8] px-6 py-2.5 rounded-full font-bold text-sm hover:bg-[#45B1A8] hover:text-white transition-colors">
+                    ) : booking.status === 'completed' && booking.service?._id && !booking.service?.isArchived ? (
+                      <Link to={`/services/${booking.service._id}`} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#E0F5F3] text-[#45B1A8] px-6 py-2.5 rounded-full font-bold text-sm hover:bg-[#45B1A8] hover:text-white transition-colors">
                         <HiCheckCircle className="w-4 h-4" /> Leave Review
                       </Link>
                     ) : null}

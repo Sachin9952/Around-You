@@ -34,7 +34,7 @@ exports.getServices = async (req, res, next) => {
   try {
     const { category, location, search, minPrice, maxPrice, sort, page = 1, limit = 10 } = req.query;
 
-    const query = { isActive: true };
+    const query = { isActive: true, isArchived: { $ne: true }, providerDeleted: { $ne: true } };
 
     // Filter by category
     if (category) {

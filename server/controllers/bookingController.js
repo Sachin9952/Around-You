@@ -36,6 +36,10 @@ exports.createBooking = async (req, res, next) => {
       return next(new ErrorResponse('This service is currently unavailable', 400));
     }
 
+    if (service.providerDeleted) {
+      return next(new ErrorResponse('This service is no longer available — the provider has removed their account', 400));
+    }
+
     // Prevent providers from booking their own services
     if (service.provider.toString() === req.user.id) {
       return next(new ErrorResponse('You cannot book your own service', 400));
@@ -75,7 +79,7 @@ exports.createBooking = async (req, res, next) => {
 exports.getMyBookings = async (req, res, next) => {
   try {
     const bookings = await Booking.find({ customer: req.user.id })
-      .populate('service', 'title category price priceType image')
+      .populate('service', 'title category price priceType image isArchived providerDeleted')
       .populate('provider', 'name email phone')
       .sort({ createdAt: -1 });
 

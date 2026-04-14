@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom';
 
 const SectionHeader = ({ title, linkTo, linkText = 'See all' }) => {
   return (
-    <div className="flex items-end justify-between mb-8 mt-12 px-4 shadow-none">
-      <h2 className="text-gray-900 font-bold text-3xl md:text-[32px] tracking-tight hover:text-black transition-colors">
+    <div className="flex items-end justify-between mb-4 md:mb-8 mt-6 md:mt-12 px-4 shadow-none">
+      <h2 className="text-gray-900 font-bold text-xl md:text-[32px] tracking-tight hover:text-black transition-colors">
         {title}
       </h2>
       
