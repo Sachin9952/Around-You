@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
 import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -118,15 +119,19 @@ const Services = () => {
 
         {/* Filter Chips */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
-          <button
+          <motion.button
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => updateFilter('category', '')}
             className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 ${!filters.category ? 'bg-[#45B1A8] text-white shadow-md' : 'bg-white text-[#4A5568] hover:bg-[#E0F5F3] hover:text-[#45B1A8]'
               }`}
           >
             All Services
-          </button>
+          </motion.button>
           {categories.map((cat) => (
-            <button
+            <motion.button
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.97 }}
               key={cat}
               onClick={() => updateFilter('category', filters.category === cat ? '' : cat)}
               className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 ${filters.category === cat
@@ -135,7 +140,7 @@ const Services = () => {
                 }`}
             >
               {cat.charAt(0).toUpperCase() + cat.slice(1)}
-            </button>
+            </motion.button>
           ))}
         </div>
 
@@ -157,9 +162,19 @@ const Services = () => {
           </div>
         ) : (
           <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-              {services.map(service => (
-                <div onClick={() => { if (!isAuthenticated) { toast('Please login to view service details', { icon: '🔒' }); navigate('/login'); return; } navigate(`/services/${service._id}`); }} key={service._id} className="group flex flex-col bg-white border border-[#E0F5F3] rounded-[2rem] transition-all duration-300 hover:shadow-[0_20px_40px_rgb(69,177,168,0.12)] hover:-translate-y-1 relative overflow-hidden cursor-pointer">
+            <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+              <AnimatePresence>
+                {services.map(service => (
+                  <motion.div 
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    whileHover={{ y: -4, scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                    onClick={() => { if (!isAuthenticated) { toast('Please login to view service details', { icon: '🔒' }); navigate('/login'); return; } navigate(`/services/${service._id}`); }} key={service._id} className="group flex flex-col bg-white border border-[#E0F5F3] rounded-[2rem] shadow-sm overflow-hidden cursor-pointer w-full"
+                  >
                   {/* Service Image Cover */}
                   <div className="h-48 w-full overflow-hidden relative">
                     <img 
@@ -200,9 +215,10 @@ const Services = () => {
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
 
             {/* Pagination */}
             {totalPages > 1 && (

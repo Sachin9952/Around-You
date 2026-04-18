@@ -1,17 +1,43 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0 }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 }
+  }
+};
 
 const CategoryGrid = ({ title, items }) => {
   return (
-    <div className="px-4 py-4">
+    <motion.div 
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-40px" }}
+      className="px-4 py-4"
+    >
       <h3 className="text-gray-900 font-bold text-lg mb-4">{title}</h3>
-      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-y-6 gap-x-2">
+      <motion.div 
+        variants={staggerContainer}
+        className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-y-6 gap-x-2"
+      >
         {items.map((item, index) => (
-          <Link 
-            key={index} 
-            to={item.link || `/services?category=${item.slug}`}
-            className="flex flex-col items-center group cursor-pointer"
-          >
-            <div className="relative w-14 h-14 md:w-24 md:h-24 mb-3 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center group-hover:bg-[#F3F1FF] group-hover:border-[#6D5AE6]/30 transition-colors shadow-sm">
+          <motion.div variants={fadeUp} key={index}>
+            <Link 
+              to={item.link || `/services?category=${item.slug}`}
+              className="flex flex-col items-center group cursor-pointer"
+            >
+              <motion.div 
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                className="relative w-14 h-14 md:w-24 md:h-24 mb-3 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center group-hover:bg-[#F3F1FF] group-hover:border-[#6D5AE6]/30 transition-colors shadow-sm"
+              >
               {item.isNew && (
                 <div className="absolute -top-1 -right-1 bg-white px-1.5 py-0.5 rounded shadow-sm border border-gray-100 z-10">
                   <span className="text-[10px] md:text-xs font-bold text-orange-500 uppercase">New</span>
@@ -23,14 +49,15 @@ const CategoryGrid = ({ title, items }) => {
               ) : item.img ? (
                  <img src={item.img} alt={item.name} className="w-8 h-8 md:w-14 md:h-14 object-contain group-hover:scale-110 transition-transform" />
               ) : null}
-            </div>
-            <span className="text-xs md:text-sm font-semibold text-gray-800 text-center leading-tight max-w-[80px]">
-              {item.name}
-            </span>
-          </Link>
+              </motion.div>
+              <span className="text-xs md:text-sm font-semibold text-gray-800 text-center leading-tight max-w-[80px]">
+                {item.name}
+              </span>
+            </Link>
+          </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

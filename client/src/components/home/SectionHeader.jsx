@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
 
 const SectionHeader = ({ title, linkTo, linkText = 'See all' }) => {
   return (
@@ -8,12 +9,14 @@ const SectionHeader = ({ title, linkTo, linkText = 'See all' }) => {
       </h2>
       
       {linkTo && (
-        <Link 
-          to={linkTo} 
-          className="hidden sm:inline-flex items-center text-sm font-medium text-[#6D5AE6] border border-[#6D5AE6]/30 bg-white hover:bg-slate-50 px-4 py-1.5 rounded-lg transition-colors shadow-sm"
-        >
-          {linkText}
-        </Link>
+        <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
+          <Link 
+            to={linkTo} 
+            className="hidden sm:inline-flex items-center text-sm font-medium text-[#6D5AE6] border border-[#6D5AE6]/30 bg-white hover:bg-slate-50 px-4 py-1.5 rounded-lg transition-colors shadow-sm"
+          >
+            {linkText}
+          </Link>
+        </motion.div>
       )}
     </div>
   );

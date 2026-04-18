@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
@@ -7,6 +7,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ChatPage from "./chat/ChatPage";
 import ChatDemo from "./chat/ChatDemo";
 import Inbox from "./pages/Inbox";
+import PageTransition from './components/PageTransition';
+import { MotionConfig, AnimatePresence } from 'motion/react';
 
 // Pages
 import Home from './pages/Home';
@@ -24,6 +26,106 @@ import Settings from './pages/Settings';
 import PostRequest from './pages/PostRequest';
 import Notifications from './pages/Notifications';
 import Footer from './components/Footer';
+
+const AnimatedRoutes = () => {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        {/* Public Routes */}
+        <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+        <Route path="/provider/login" element={<PageTransition><ProviderLogin /></PageTransition>} />
+        <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+        <Route path="/provider/register" element={<PageTransition><ProviderRegister /></PageTransition>} />
+        <Route path="/services" element={<PageTransition><Services /></PageTransition>} />
+        <Route path="/services/:id" element={<PageTransition><ServiceDetail /></PageTransition>} />
+        <Route path="/chat/:providerId" element={<PageTransition><ChatPage /></PageTransition>} />
+        <Route path="/chat-demo" element={<PageTransition><ChatDemo /></PageTransition>} />
+        <Route path="/inbox" element={<ProtectedRoute><PageTransition><Inbox /></PageTransition></ProtectedRoute>} />
+
+        {/* Customer Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute roles={['customer']}>
+              <PageTransition><CustomerDashboard /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Provider Routes */}
+        <Route
+          path="/provider/dashboard"
+          element={
+            <ProtectedRoute roles={['provider']}>
+              <PageTransition><ProviderDashboard /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <PageTransition><Settings /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/post-request"
+          element={
+            <ProtectedRoute>
+              <PageTransition><PostRequest /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <PageTransition><Notifications /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Routes */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <PageTransition><AdminDashboard /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/support"
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <PageTransition><AdminSupport /></PageTransition>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 404 */}
+        <Route
+          path="*"
+          element={
+            <PageTransition>
+              <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-dark-900 border-t border-dark-900">
+                <div className="text-center">
+                  <h1 className="text-6xl font-bold text-primary-500 mb-4">404</h1>
+                  <p className="text-xl text-dark-200">Page not found</p>
+                </div>
+              </div>
+            </PageTransition>
+          }
+        />
+      </Routes>
+    </AnimatePresence>
+  );
+};
 
 function App() {
   // ── Keep the Render backend alive (free tier sleeps after 15 min) ──
@@ -45,101 +147,15 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="min-h-screen bg-dark-900 flex flex-col">
-          <Navbar />
-          <main className="flex-1">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/provider/login" element={<ProviderLogin />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/provider/register" element={<ProviderRegister />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/services/:id" element={<ServiceDetail />} />
-              <Route path="/chat/:providerId" element={<ChatPage />} />
-              <Route path="/chat-demo" element={<ChatDemo />} />
-              <Route path="/inbox" element={<ProtectedRoute><Inbox /></ProtectedRoute>} />
-
-              {/* Customer Routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute roles={['customer']}>
-                    <CustomerDashboard />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Provider Routes */}
-              <Route
-                path="/provider/dashboard"
-                element={
-                  <ProtectedRoute roles={['provider']}>
-                    <ProviderDashboard />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/post-request"
-                element={
-                  <ProtectedRoute>
-                    <PostRequest />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/notifications"
-                element={
-                  <ProtectedRoute>
-                    <Notifications />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Admin Routes */}
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <ProtectedRoute roles={['admin']}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/support"
-                element={
-                  <ProtectedRoute roles={['admin']}>
-                    <AdminSupport />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* 404 */}
-              <Route
-                path="*"
-                element={
-                  <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-dark-900 border-t border-dark-900">
-                    <div className="text-center">
-                      <h1 className="text-6xl font-bold text-primary-500 mb-4">404</h1>
-                      <p className="text-xl text-dark-200">Page not found</p>
-                    </div>
-                  </div>
-                }
-              />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
+        <MotionConfig transition={{ duration: 0.3, ease: 'easeInOut' }}>
+          <div className="min-h-screen bg-dark-900 flex flex-col">
+            <Navbar />
+            <main className="flex-1 overflow-x-hidden">
+              <AnimatedRoutes />
+            </main>
+            <Footer />
+          </div>
+        </MotionConfig>
 
         {/* Toast notifications */}
         <Toaster

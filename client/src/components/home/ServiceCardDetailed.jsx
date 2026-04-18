@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { HiStar } from 'react-icons/hi';
 import { HiBolt } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
+import { motion } from 'motion/react';
 
 const ServiceCardDetailed = ({ service }) => {
   const navigate = useNavigate();
@@ -18,7 +19,11 @@ const ServiceCardDetailed = ({ service }) => {
   };
 
   return (
-    <div 
+    <motion.div 
+      layout
+      whileHover={{ y: -4, scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ type: "spring", stiffness: 300, damping: 24 }}
       onClick={handleClick}
       className="flex flex-col group/card cursor-pointer w-full sm:w-[320px] sm:shrink-0 outline-none"
     >
@@ -71,7 +76,7 @@ const ServiceCardDetailed = ({ service }) => {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
