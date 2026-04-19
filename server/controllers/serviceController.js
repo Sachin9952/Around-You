@@ -67,20 +67,32 @@ exports.getServices = async (req, res, next) => {
     const skip = (Number(page) - 1) * Number(limit);
 
     const services = await Service.find(query)
-      .populate('provider', 'name email phone avatar')
+      .populate('provider', 'name email phone avatar isActive')
       .sort(sortOption)
       .skip(skip)
       .limit(Number(limit));
 
     const total = await Service.countDocuments(query);
 
+    const formattedServices = services.map(s => {
+      const obj = s.toObject();
+      obj.isBookable = Boolean(
+        obj.isActive && 
+        !obj.isArchived && 
+        !obj.providerDeleted &&
+        obj.provider && 
+        obj.provider.isActive !== false
+      );
+      return obj;
+    });
+
     res.status(200).json({
       success: true,
-      count: services.length,
+      count: formattedServices.length,
       total,
       totalPages: Math.ceil(total / Number(limit)),
       currentPage: Number(page),
-      data: services,
+      data: formattedServices,
     });
   } catch (err) {
     next(err);
@@ -94,16 +106,25 @@ exports.getService = async (req, res, next) => {
   try {
     const service = await Service.findById(req.params.id).populate(
       'provider',
-      'name email phone avatar'
+      'name email phone avatar isActive'
     );
 
     if (!service) {
       return next(new ErrorResponse('Service not found', 404));
     }
 
+    const serviceObj = service.toObject();
+    serviceObj.isBookable = Boolean(
+      serviceObj.isActive &&
+      !serviceObj.isArchived &&
+      !serviceObj.providerDeleted &&
+      serviceObj.provider &&
+      serviceObj.provider.isActive !== false
+    );
+
     res.status(200).json({
       success: true,
-      data: service,
+      data: serviceObj,
     });
   } catch (err) {
     next(err);

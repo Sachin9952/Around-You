@@ -26,6 +26,7 @@ import Settings from './pages/Settings';
 import PostRequest from './pages/PostRequest';
 import Notifications from './pages/Notifications';
 import Footer from './components/Footer';
+import CardsDemo from './pages/CardsDemo';
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -43,6 +44,7 @@ const AnimatedRoutes = () => {
         <Route path="/services/:id" element={<PageTransition><ServiceDetail /></PageTransition>} />
         <Route path="/chat/:providerId" element={<PageTransition><ChatPage /></PageTransition>} />
         <Route path="/chat-demo" element={<PageTransition><ChatDemo /></PageTransition>} />
+        <Route path="/cards-demo" element={<PageTransition><CardsDemo /></PageTransition>} />
         <Route path="/inbox" element={<ProtectedRoute><PageTransition><Inbox /></PageTransition></ProtectedRoute>} />
 
         {/* Customer Routes */}

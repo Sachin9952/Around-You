@@ -8,6 +8,7 @@ import InputBox from "./InputBox";
 import ChatHeader from "./ChatHeader";
 import TypingIndicator from "./TypingIndicator";
 import API from "../api/axios";
+import ChatBookingModal from "./ChatBookingModal";
 
 /**
  * DUMMY DATA — Used for testing when no real backend is available.
@@ -95,15 +96,19 @@ function getSocket() {
 const Chat = ({
   userId,
   roomId,
+  partnerId,
   partnerName = "Service Provider",
   partnerAvatar,
   partnerOnline = false,
+  partnerRole,
   onBack,
   useDummy = false,
 }) => {
   const [messages, setMessages] = useState(useDummy ? DUMMY_MESSAGES : []);
   const [isTyping, setIsTyping] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [isPartnerOnline, setIsPartnerOnline] = useState(partnerOnline);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   // "connected" | "connecting" | "disconnected" | "error"
   const [connectionStatus, setConnectionStatus] = useState(useDummy ? "connected" : "connecting");
 
@@ -173,6 +178,32 @@ const Chat = ({
     // ── Message & typing listeners ─────────────────────────────────
     const handleReceive = (data) => {
       setMessages((prev) => [...prev, data]);
+      // If we are actively looking at the chat and the message is from partner, mark it as seen!
+      if (document.hasFocus() && data.senderId !== userId) {
+        socket.emit("message_seen", { messageId: data._id, senderId: data.senderId });
+      } else if (data.senderId !== userId) {
+        socket.emit("message_delivered", { messageId: data._id, senderId: data.senderId });
+      }
+    };
+
+    const handleUpdateStatus = ({ messageId, status }) => {
+      setMessages((prev) => 
+        prev.map(m => m._id === messageId ? { ...m, status } : m)
+      );
+    };
+
+    const handleBatchUpdate = ({ room, status }) => {
+      setMessages((prev) => 
+        prev.map(m => (m.conversationId === room || m.room === room) && m.senderId === userId && m.status !== 'seen' ? { ...m, status } : m)
+      );
+    };
+
+    const handleUserOnline = ({ userId: id }) => {
+      if (id === partnerId) setIsPartnerOnline(true);
+    };
+
+    const handleUserOffline = ({ userId: id }) => {
+      if (id === partnerId) setIsPartnerOnline(false);
     };
 
     const handleTyping = (data) => {
@@ -190,8 +221,15 @@ const Chat = ({
     };
 
     socket.on("receive_message", handleReceive);
+    socket.on("update_message_status", handleUpdateStatus);
+    socket.on("batch_update_status", handleBatchUpdate);
+    socket.on("user_online", handleUserOnline);
+    socket.on("user_offline", handleUserOffline);
     socket.on("user_typing", handleTyping);
     socket.on("user_stop_typing", handleStopTyping);
+
+    // Initial batch seen emit when chat mounts
+    socket.emit("messages_seen_batch", { room: roomId, partnerId: partnerId });
 
     return () => {
       socket.off("connect", handleConnect);
@@ -200,6 +238,10 @@ const Chat = ({
       socket.io.off("reconnect_attempt", handleReconnectAttempt);
       socket.io.off("reconnect", handleReconnect);
       socket.off("receive_message", handleReceive);
+      socket.off("update_message_status", handleUpdateStatus);
+      socket.off("batch_update_status", handleBatchUpdate);
+      socket.off("user_online", handleUserOnline);
+      socket.off("user_offline", handleUserOffline);
       socket.off("user_typing", handleTyping);
       socket.off("user_stop_typing", handleStopTyping);
       clearTimeout(typingTimeoutRef.current);
@@ -239,64 +281,53 @@ const Chat = ({
     (text) => {
       if (!text) return;
 
-      // senderId will be set by the server
       const msgData = {
         room: roomId,
+        receiverId: partnerId,
+        type: 'text',
         message: text,
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        status: "sent",
       };
 
-      if (useDummy) {
-        setMessages((prev) => [...prev, { ...msgData, senderId: userId, _id: Date.now().toString() }]);
-        return;
-      }
+      if (useDummy) return;
 
       getSocket().emit("send_message", msgData);
       getSocket().emit("stop_typing", { room: roomId, senderId: userId });
     },
-    [roomId, userId, useDummy]
+    [roomId, userId, partnerId, useDummy]
   );
 
-  // ─── Send image via Cloudinary ───────────────────────────────────
-  const handleImageSend = useCallback(
-    async (file) => {
+  // ─── Send uploaded files (Images, PDFs, Voice) ───────────────────
+  const handleAttachmentSend = useCallback(
+    async (file, type = 'image') => {
       if (!file) return;
       try {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("upload_preset", "aroundyou_upload");
 
-        const res = await fetch(
-          "https://api.cloudinary.com/v1_1/dx8khsk8y/image/upload",
-          { method: "POST", body: formData }
-        );
-        const data = await res.json();
+        const res = await API.post("/upload/attachment", formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
 
-        if (!data.secure_url) {
-          console.error("Upload failed:", data);
+        if (!res.data.success || !res.data.url) {
+          console.error("Upload failed");
           return;
         }
 
         const msgData = {
           room: roomId,
-          senderId: userId,
-          image: data.secure_url,
-          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          status: "sent",
+          receiverId: partnerId,
+          type: type,
+          fileUrl: res.data.url,
         };
 
-        if (useDummy) {
-          setMessages((prev) => [...prev, { ...msgData, _id: Date.now().toString() }]);
-          return;
-        }
+        if (useDummy) return;
 
         getSocket().emit("send_message", msgData);
       } catch (error) {
-        console.error("Error uploading image:", error);
+        console.error("Error uploading attachment:", error);
       }
     },
-    [roomId, userId, useDummy]
+    [roomId, partnerId, useDummy]
   );
 
   // ─── Typing notification ────────────────────────────────────────
@@ -319,16 +350,15 @@ const Chat = ({
   );
 
   return (
-    <div
-      className="flex flex-col h-full w-full bg-white relative overflow-hidden"
-      id="chat-container"
-    >
+    <div className="flex flex-col h-[100dvh] sm:h-[600px] bg-dark-900 w-full relative">
       {/* ── Header ─────────────────────────────────────────────── */}
       <ChatHeader
         userName={partnerName}
         avatarUrl={partnerAvatar}
-        isOnline={partnerOnline}
+        isOnline={isPartnerOnline}
+        partnerRole={partnerRole}
         onBack={onBack}
+        onBookPress={() => setIsBookingModalOpen(true)}
       />
 
       {/* ── Connection status banner ────────────────────────────── */}
@@ -387,11 +417,18 @@ const Chat = ({
           {isTyping && <TypingIndicator userName={partnerName} />}
         </AnimatePresence>
 
-        {/* Scroll anchor */}
-        <div ref={messagesEndRef} />
-      </div>
+      {/* scroll-to-bottom anchor */}
+      <div ref={messagesEndRef} className="h-4" />
+    </div>
 
-      {/* ── Floating scroll-to-bottom button ───────────────────── */}
+    {/* ── ChatBookingModal ── */}
+    <ChatBookingModal 
+      isOpen={isBookingModalOpen} 
+      onClose={() => setIsBookingModalOpen(false)} 
+      providerId={partnerId} 
+    />
+
+    {/* ── Scroll to bottom button ────────────────────────────── */}
       <AnimatePresence>
         {showScrollBtn && (
           <motion.button
@@ -414,7 +451,7 @@ const Chat = ({
       {/* ── Input bar ──────────────────────────────────────────── */}
       <InputBox
         onSend={handleSendText}
-        onImageSend={handleImageSend}
+        onAttachmentSend={handleAttachmentSend}
         onTyping={handleTypingNotify}
       />
     </div>

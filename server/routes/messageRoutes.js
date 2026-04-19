@@ -10,42 +10,52 @@ router.get("/inbox", protect, async (req, res) => {
   try {
     const currentUserId = req.user._id.toString();
 
-    // 1. Find all messages where room contains the current user's ID
-    const userMessages = await Message.find({ room: { $regex: currentUserId } })
+    // 1. Find all messages where conversationId contains the current user's ID
+    const userMessages = await Message.find({ conversationId: { $regex: currentUserId } })
       .sort({ createdAt: -1 });
 
-    // 2. Group by room, keeping only the latest message per room
+    // 2. Group by conversationId, keeping only the latest message per conversation
     const uniqueRooms = new Map();
     userMessages.forEach(msg => {
-      if (!uniqueRooms.has(msg.room)) {
-        uniqueRooms.set(msg.room, msg);
+      if (!uniqueRooms.has(msg.conversationId)) {
+        uniqueRooms.set(msg.conversationId, msg);
       }
     });
 
     // 3. Extract partner IDs and wait for User queries
     const inbox = await Promise.all(
       Array.from(uniqueRooms.values()).map(async (latestMessage) => {
-        // Room is of format "userId1_userId2"
-        const ids = latestMessage.room.split('_');
+        // conversationId is of format "userId1_userId2"
+        const ids = latestMessage.conversationId.split('_');
         const partnerId = ids.find(id => id !== currentUserId) || currentUserId; // Fallback to SELF if chatting with self
         
         let partnerData = null;
         if (partnerId && mongoose.Types.ObjectId.isValid(partnerId)) {
-          const partner = await User.findById(partnerId).select('name avatar role');
+          const partner = await User.findById(partnerId).select('name avatar role isOnline lastSeen');
           if (partner) {
             partnerData = {
               _id: partner._id,
               name: partner.name,
               avatar: partner.avatar,
-              role: partner.role
+              role: partner.role,
+              isOnline: partner.isOnline,
+              lastSeen: partner.lastSeen
             };
           }
         }
 
+        let previewText = latestMessage.content || '';
+        if (latestMessage.type === 'image') previewText = 'Shared an image';
+        if (latestMessage.type === 'pdf') previewText = 'Shared a document';
+        if (latestMessage.type === 'voice') previewText = '🎤 Voice message';
+        if (latestMessage.type === 'booking_prompt') previewText = '📅 Booking Request';
+
         return {
-          room: latestMessage.room,
-          latestMessage: latestMessage.message || "Shared an image",
-          time: latestMessage.time,
+          room: latestMessage.conversationId,
+          latestMessage: previewText,
+          time: new Date(latestMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: latestMessage.status,
+          sender: latestMessage.sender,
           createdAt: latestMessage.createdAt,
           partner: partnerData || { _id: partnerId, name: "Unknown User" }
         };
@@ -65,7 +75,7 @@ router.get("/inbox", protect, async (req, res) => {
 // Get messages of a room
 router.get("/:roomId", protect, async (req, res) => {
   try {
-    const messages = await Message.find({ room: req.params.roomId }).sort({ createdAt: 1 });
+    const messages = await Message.find({ conversationId: req.params.roomId }).sort({ createdAt: 1 });
     res.json(messages);
   } catch (error) {
     res.status(500).json({ success: false, error: 'Server Error' });

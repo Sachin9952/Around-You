@@ -10,6 +10,7 @@ dotenv.config();
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const Message = require('./models/Message');
+const User = require('./models/User');
 
 // ─── 2. Connect to MongoDB BEFORE starting the server ───
 connectDB();
@@ -57,32 +58,95 @@ io.use((socket, next) => {
 // Make io accessible in routes (optional advanced)
 app.set("io", io);
 
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+// Keep track of active users to handle presence mapping
+const userSocketMap = new Map();
+
+io.on("connection", async (socket) => {
+  const userId = socket.user.id;
+  userSocketMap.set(userId, socket.id);
+
+  console.log(`User connected: ${userId} -> Socket: ${socket.id}`);
+
+  // Mark user as online in DB and broadcast
+  await User.findByIdAndUpdate(userId, { isOnline: true });
+  socket.broadcast.emit("user_online", { userId });
 
   socket.on("join_room", (room) => {
     socket.join(room);
   });
 
+  // Handle incoming message sending dynamically
   socket.on("send_message", async (data) => {
-      try {
-        // Always trust the authenticated user for senderId
-        const msgData = {
-          ...data,
-          senderId: socket.user.id,
-        };
-        // Save to DB
-        const saved = await Message.create(msgData);
-        // Emit to all clients in the room (including sender)
-        io.to(msgData.room).emit("receive_message", {
-          ...msgData,
-          _id: saved._id,
-        });
-      } catch (err) {
-        console.error("Error saving message:", err);
-        // Still emit so the sender sees it (best effort)
-        io.to(data.room).emit("receive_message", data);
+    try {
+      // 1. Create DB entry securely. Trusting server auth for sender.
+      const newMsg = await Message.create({
+        conversationId: data.room,
+        sender: userId,
+        receiver: data.receiverId,
+        type: data.type || 'text',
+        content: data.message,
+        fileUrl: data.fileUrl,
+        status: "sent"
+      });
+
+      const populatedMsg = await Message.findById(newMsg._id).populate('sender', 'name avatar');
+      
+      const payload = {
+        _id: populatedMsg._id,
+        conversationId: data.room,
+        senderId: userId,
+        receiverId: data.receiverId,
+        type: populatedMsg.type,
+        message: populatedMsg.content,
+        fileUrl: populatedMsg.fileUrl,
+        status: populatedMsg.status,
+        time: new Date(populatedMsg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+
+      // 2. Deliver physically exactly to the receiver if they are mapped online
+      const receiverSocketId = userSocketMap.get(data.receiverId);
+      if (receiverSocketId) {
+        // Emit specifically to user's connected socket, ensuring receipt
+        io.to(receiverSocketId).emit("receive_message", payload);
+        
+        // Auto-mark as delivered since socket is verified connected
+        populatedMsg.status = "delivered";
+        await populatedMsg.save();
+        payload.status = "delivered";
       }
+
+      // 3. Emit back to the sender
+      socket.emit("receive_message", payload);
+      
+      // Secondary fallback (legacy support): Emit to the whole room in case they use multiple tabs
+      // io.to(data.room).emit("receive_message", payload);
+
+    } catch (err) {
+      console.error("Error saving message:", err);
+    }
+  });
+
+  // Read receipts flow
+  socket.on("message_delivered", async ({ messageId, senderId }) => {
+    await Message.findByIdAndUpdate(messageId, { status: "delivered" });
+    const senderSocketId = userSocketMap.get(senderId);
+    if (senderSocketId) io.to(senderSocketId).emit("update_message_status", { messageId, status: "delivered" });
+  });
+
+  socket.on("message_seen", async ({ messageId, senderId }) => {
+    await Message.findByIdAndUpdate(messageId, { status: "seen" });
+    const senderSocketId = userSocketMap.get(senderId);
+    if (senderSocketId) io.to(senderSocketId).emit("update_message_status", { messageId, status: "seen" });
+  });
+
+  // Batch seen (for opening the chat tab)
+  socket.on("messages_seen_batch", async ({ room, partnerId }) => {
+    await Message.updateMany(
+      { conversationId: room, sender: partnerId, status: { $ne: "seen" } },
+      { $set: { status: "seen" } }
+    );
+    const partnerSocketId = userSocketMap.get(partnerId);
+    if (partnerSocketId) io.to(partnerSocketId).emit("batch_update_status", { room, status: "seen" });
   });
 
   // Typing events
@@ -94,8 +158,13 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("user_stop_typing", data);
   });
 
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+  socket.on("disconnect", async () => {
+    console.log(`User disconnected: ${userId}`);
+    userSocketMap.delete(userId);
+    
+    // Fallback: Check if they have other tabs open? For simplicity, we assume completely offline
+    await User.findByIdAndUpdate(userId, { isOnline: false, lastSeen: new Date() });
+    socket.broadcast.emit("user_offline", { userId, lastSeen: new Date() });
   });
 });
 
@@ -108,6 +177,7 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/support', require('./routes/supportRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use("/api/messages", require("./routes/messageRoutes"));
+app.use("/api/upload", require("./routes/uploadRoutes"));
 
 // Health check
 app.get('/api/health', (req, res) => {

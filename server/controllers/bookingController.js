@@ -27,7 +27,7 @@ exports.createBooking = async (req, res, next) => {
     const { service: serviceId, date, time, notes, address } = req.body;
 
     // Fetch the service to get the provider
-    const service = await Service.findById(serviceId);
+    const service = await Service.findById(serviceId).populate('provider');
     if (!service) {
       return next(new ErrorResponse('Service not found', 404));
     }
@@ -40,19 +40,24 @@ exports.createBooking = async (req, res, next) => {
       return next(new ErrorResponse('This service is no longer available — the provider has removed their account', 400));
     }
 
+    // STRICT BOOKING SAFETY RULE: Ensure provider exists and is active.
+    if (!service.provider || service.provider.isActive === false) {
+      return next(new ErrorResponse('This service is no longer available because the provider account is unavailable.', 400));
+    }
+
     // Prevent providers from booking their own services
-    if (service.provider.toString() === req.user.id) {
+    if (service.provider._id.toString() === req.user.id) {
       return next(new ErrorResponse('You cannot book your own service', 400));
     }
 
     // Fetch customer & provider names for snapshot
     const customer = await User.findById(req.user.id).select('name');
-    const provider = await User.findById(service.provider).select('name');
+    const provider = service.provider; // We already populated it
 
     const booking = await Booking.create({
       customer: req.user.id,
       service: serviceId,
-      provider: service.provider,
+      provider: service.provider._id,
       date,
       time,
       notes,

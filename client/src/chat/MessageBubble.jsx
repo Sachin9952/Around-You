@@ -50,7 +50,7 @@ const MessageBubble = memo(({ msg, isOwn }) => {
       >
         {/* Bubble */}
         <div
-          className={`relative px-4 py-2.5 max-w-[75%] sm:max-w-[65%] break-words
+          className={`relative px-4 py-2.5 max-w-[85%] sm:max-w-[75%] break-words
             ${
               isOwn
                 ? "bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-2xl rounded-br-md shadow-lg shadow-primary-600/20"
@@ -63,10 +63,25 @@ const MessageBubble = memo(({ msg, isOwn }) => {
             <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
           )}
 
+          {/* Voice content */}
+          {msg.type === 'voice' && msg.fileUrl && (
+            <div className="mt-1">
+              <audio controls src={msg.fileUrl} className={`h-10 ${isOwn ? 'invert brightness-0 contrast-200 sepia hue-rotate-180' : ''}`} />
+            </div>
+          )}
+
+          {/* PDF content */}
+          {msg.type === 'pdf' && msg.fileUrl && (
+            <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="mt-2 flex items-center gap-3 bg-black/20 p-3 rounded-lg hover:bg-black/30 transition">
+              <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">PDF</div>
+              <span className="text-sm font-medium underline">View Document</span>
+            </a>
+          )}
+
           {/* Image content */}
-          {msg.image && (
+          {(msg.type === 'image' || (!msg.type && msg.image)) && (msg.fileUrl || msg.image) && (
             <img
-              src={msg.image}
+              src={msg.fileUrl || msg.image}
               alt="shared"
               loading="lazy"
               onClick={() => setIsModalOpen(true)}
@@ -95,7 +110,7 @@ const MessageBubble = memo(({ msg, isOwn }) => {
 
       {/* Full Screen Image Modal */}
       <AnimatePresence>
-        {isModalOpen && msg.image && (
+        {isModalOpen && (msg.fileUrl || msg.image) && (msg.type === 'image' || !msg.type) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -118,10 +133,10 @@ const MessageBubble = memo(({ msg, isOwn }) => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              src={msg.image}
+              src={msg.fileUrl || msg.image}
               alt="shared full screen"
               className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl drop-shadow-2xl"
-              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking on the image itself
+              onClick={(e) => e.stopPropagation()} 
             />
           </motion.div>
         )}

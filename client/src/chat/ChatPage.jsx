@@ -65,9 +65,11 @@ const ChatPage = () => {
         <Chat
           userId={userId}
           roomId={roomId}
+          partnerId={providerId}
           partnerName={partner?.name || "Service Provider"}
           partnerAvatar={partner?.avatar}
-          partnerOnline={true}
+          partnerOnline={partner?.isOnline || false}
+          partnerRole={partner?.role}
           onBack={() => navigate(-1)}
         />
       </div>

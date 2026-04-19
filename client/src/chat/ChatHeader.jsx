@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { HiArrowLeft, HiEllipsisVertical, HiPhone, HiVideoCameraSlash } from "react-icons/hi2";
+import { HiArrowLeft, HiEllipsisVertical, HiPhone, HiVideoCameraSlash, HiCalendar } from "react-icons/hi2";
 
 /**
  * ChatHeader — Top bar of the chat view showing:
@@ -14,7 +14,7 @@ import { HiArrowLeft, HiEllipsisVertical, HiPhone, HiVideoCameraSlash } from "re
  *  @param {boolean} isOnline    — Whether the user is currently online
  *  @param {function} onBack     — Handler for back button
  */
-const ChatHeader = ({ userName = "User", avatarUrl, isOnline = false, onBack }) => {
+const ChatHeader = ({ userName = "User", avatarUrl, isOnline = false, partnerRole, onBack, onBookPress }) => {
   // Generate initials from name (e.g. "John Doe" → "JD")
   const initials = userName
     .split(" ")
@@ -72,7 +72,16 @@ const ChatHeader = ({ userName = "User", avatarUrl, isOnline = false, onBack }) 
       </div>
 
       {/* Action icons */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 sm:gap-2">
+        {partnerRole === 'provider' && (
+          <button
+            onClick={onBookPress}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-500 text-white text-xs font-semibold rounded-lg shadow-lg shadow-primary-500/20 transition-colors"
+          >
+            <HiCalendar className="w-4 h-4" />
+            Book Now
+          </button>
+        )}
         <button
           className="p-2 rounded-xl text-dark-200 hover:text-primary-400 hover:bg-dark-600/60
             transition-all duration-200"

@@ -177,6 +177,11 @@ const Services = () => {
                   >
                   {/* Service Image Cover */}
                   <div className="h-48 w-full overflow-hidden relative">
+                    {service.isBookable === false && (
+                      <div className="absolute top-3 left-3 z-20 bg-gray-900/80 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-white/20 shadow-lg">
+                        Unavailable
+                      </div>
+                    )}
                     <img 
                       src={service.image || categoryImages[service.category] || categoryImages.default} 
                       alt={service.title} 

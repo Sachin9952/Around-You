@@ -40,10 +40,22 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true, // Providers are now auto-approved out of the box
     },
+    isActive: {
+      type: Boolean,
+      default: true, // Used to track soft-deletion or blocking
+    },
     avatar: {
       type: String,
       default: '',
     },
+    isOnline: {
+      type: Boolean,
+      default: false
+    },
+    lastSeen: {
+      type: Date,
+      default: Date.now
+    }
   },
   {
     timestamps: true, // adds createdAt & updatedAt automatically

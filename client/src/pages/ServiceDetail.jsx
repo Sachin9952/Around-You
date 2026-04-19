@@ -146,14 +146,14 @@ const ServiceDetail = () => {
           
           <div className="p-8 md:p-12">
             {/* Archived Service Banner */}
-            {(service.isArchived || service.providerDeleted) && (
+            {service.isBookable === false && (
               <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-6 py-4 mb-8">
                 <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
                   <HiExclamation className="w-5 h-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-amber-800 font-bold text-sm">This service is no longer available</p>
-                  <p className="text-amber-600 text-xs font-medium">The provider has removed their account. This page is kept for your booking history.</p>
+                  <p className="text-amber-800 font-bold text-sm">This service is currently unavailable</p>
+                  <p className="text-amber-600 text-xs font-medium">The service provider is unavailable or their account has been removed. This page is kept for your booking history.</p>
                 </div>
               </div>
             )}
@@ -203,7 +203,7 @@ const ServiceDetail = () => {
               </div>
 
               {/* Book Button (Desktop Placement) */}
-              {user?.role === 'customer' && !service.isArchived && !service.providerDeleted && (
+              {user?.role === 'customer' && service.isBookable !== false && (
                 <div className="hidden lg:block mt-8">
                   <button
                     onClick={() => setShowBookingForm(!showBookingForm)}
@@ -248,7 +248,7 @@ const ServiceDetail = () => {
                 </div>
 
                 {/* Chat with Provider Button */}
-                {user && user._id !== service.provider._id && !service.isArchived && (
+                {user && user._id !== service.provider._id && service.isBookable !== false && (
                   <button
                     className="w-full bg-white border-2 border-[#45B1A8] text-[#45B1A8] hover:bg-[#45B1A8] hover:text-white px-6 py-3 rounded-full font-bold transition-colors inline-flex items-center justify-center gap-2"
                     onClick={() => navigate(`/chat/${service.provider._id}`)}
@@ -277,7 +277,7 @@ const ServiceDetail = () => {
             )}
             
             {/* Book Button (Mobile Placement) */}
-            {user?.role === 'customer' && !service.isArchived && !service.providerDeleted && (
+            {user?.role === 'customer' && service.isBookable !== false && (
               <div className="block lg:hidden w-full mt-4">
                 <button
                   onClick={() => setShowBookingForm(!showBookingForm)}
