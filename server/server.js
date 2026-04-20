@@ -62,10 +62,13 @@ app.set("io", io);
 const userSocketMap = new Map();
 
 io.on("connection", async (socket) => {
-  const userId = socket.user.id;
+  const userId = socket.user.id.toString(); // Ensure userId is a string
   userSocketMap.set(userId, socket.id);
 
   console.log(`User connected: ${userId} -> Socket: ${socket.id}`);
+  
+  // Join a personal room to handle multiple tabs/sessions
+  socket.join(`user_${userId}`);
 
   // Mark user as online in DB and broadcast
   await User.findByIdAndUpdate(userId, { isOnline: true });
@@ -103,20 +106,19 @@ io.on("connection", async (socket) => {
         time: new Date(populatedMsg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
 
-      // 2. Deliver physically exactly to the receiver if they are mapped online
-      const receiverSocketId = userSocketMap.get(data.receiverId);
-      if (receiverSocketId) {
-        // Emit specifically to user's connected socket, ensuring receipt
-        io.to(receiverSocketId).emit("receive_message", payload);
-        
-        // Auto-mark as delivered since socket is verified connected
+      // 2. Deliver physically to all active sessions of the receiver
+      io.to(`user_${data.receiverId}`).emit("receive_message", payload);
+
+      // 3. Emit back to all active sessions of the sender (handles multiple tabs)
+      io.to(`user_${userId}`).emit("receive_message", payload);
+
+      // Auto-mark as delivered if receiver is online
+      if (userSocketMap.has(data.receiverId)) {
         populatedMsg.status = "delivered";
         await populatedMsg.save();
-        payload.status = "delivered";
+        // and notify sender(s)
+        io.to(`user_${userId}`).emit("update_message_status", { messageId: populatedMsg._id, status: "delivered" });
       }
-
-      // 3. Emit back to the sender
-      socket.emit("receive_message", payload);
       
       // Secondary fallback (legacy support): Emit to the whole room in case they use multiple tabs
       // io.to(data.room).emit("receive_message", payload);

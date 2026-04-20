@@ -199,7 +199,9 @@ const Services = () => {
                       {service.location && (
                         <div className="flex items-center text-xs font-semibold text-[#4A5568] bg-[#F5FDFD] px-2 py-1 rounded-md border border-[#E0F5F3]">
                           <HiLocationMarker className="w-3.5 h-3.5 mr-1 text-[#45B1A8]" />
-                          <span className="truncate max-w-[100px]">{service.location}</span>
+                          <span className="truncate max-w-[100px]">
+                            {typeof service.location === 'object' ? service.location?.address : service.location}
+                          </span>
                         </div>
                       )}
                     </div>

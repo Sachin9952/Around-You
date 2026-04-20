@@ -116,7 +116,9 @@ const CustomerDashboard = () => {
                       </span>
                       <span className="flex items-start gap-2 sm:col-span-2">
                         <HiLocationMarker className="w-5 h-5 text-[#45B1A8] shrink-0 mt-0.5" />
-                        <span className="line-clamp-2">{booking.address}</span>
+                        <span className="line-clamp-2">
+                          {typeof booking.address === 'object' ? booking.address?.address : booking.address}
+                        </span>
                       </span>
                     </div>
 

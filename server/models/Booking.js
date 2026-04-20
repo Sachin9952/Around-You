@@ -36,7 +36,7 @@ const bookingSchema = new mongoose.Schema(
       default: '',
     },
     address: {
-      type: String,
+      type: mongoose.Schema.Types.Mixed,
       required: [true, 'Please provide a service address'],
     },
     // Snapshot fields — preserved even if referenced docs are deleted

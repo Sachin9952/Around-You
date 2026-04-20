@@ -34,7 +34,7 @@ const serviceSchema = new mongoose.Schema(
       default: 'fixed',
     },
     location: {
-      type: String,
+      type: mongoose.Schema.Types.Mixed,
       required: [true, 'Please provide a location'],
     },
     image: {

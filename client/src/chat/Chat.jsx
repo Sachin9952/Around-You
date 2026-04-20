@@ -177,11 +177,16 @@ const Chat = ({
 
     // ── Message & typing listeners ─────────────────────────────────
     const handleReceive = (data) => {
-      setMessages((prev) => [...prev, data]);
+      setMessages((prev) => {
+        // Prevent duplicates (especially for the sender who now gets the message via 'user_Room' broadcast)
+        if (prev.some(m => m._id === data._id)) return prev;
+        return [...prev, data];
+      });
+      
       // If we are actively looking at the chat and the message is from partner, mark it as seen!
-      if (document.hasFocus() && data.senderId !== userId) {
+      if (document.hasFocus() && data.senderId?.toString() !== userId?.toString()) {
         socket.emit("message_seen", { messageId: data._id, senderId: data.senderId });
-      } else if (data.senderId !== userId) {
+      } else if (data.senderId?.toString() !== userId?.toString()) {
         socket.emit("message_delivered", { messageId: data._id, senderId: data.senderId });
       }
     };
@@ -199,11 +204,11 @@ const Chat = ({
     };
 
     const handleUserOnline = ({ userId: id }) => {
-      if (id === partnerId) setIsPartnerOnline(true);
+      if (id?.toString() === partnerId?.toString()) setIsPartnerOnline(true);
     };
 
     const handleUserOffline = ({ userId: id }) => {
-      if (id === partnerId) setIsPartnerOnline(false);
+      if (id?.toString() === partnerId?.toString()) setIsPartnerOnline(false);
     };
 
     const handleTyping = (data) => {

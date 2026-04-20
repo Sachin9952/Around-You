@@ -18,6 +18,7 @@ import Register from './pages/Register';
 import ProviderRegister from './pages/ProviderRegister';
 import Services from './pages/Services';
 import ServiceDetail from './pages/ServiceDetail';
+import NearbyServices from './pages/NearbyServices';
 import CustomerDashboard from './pages/CustomerDashboard';
 import ProviderDashboard from './pages/ProviderDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -41,6 +42,7 @@ const AnimatedRoutes = () => {
         <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
         <Route path="/provider/register" element={<PageTransition><ProviderRegister /></PageTransition>} />
         <Route path="/services" element={<PageTransition><Services /></PageTransition>} />
+        <Route path="/nearby" element={<PageTransition><NearbyServices /></PageTransition>} />
         <Route path="/services/:id" element={<PageTransition><ServiceDetail /></PageTransition>} />
         <Route path="/chat/:providerId" element={<PageTransition><ChatPage /></PageTransition>} />
         <Route path="/chat-demo" element={<PageTransition><ChatDemo /></PageTransition>} />

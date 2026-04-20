@@ -28,7 +28,8 @@ const ProviderDashboard = () => {
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [serviceForm, setServiceForm] = useState({
-    title: '', description: '', category: 'plumber', price: '', priceType: 'fixed', location: '',
+    title: '', description: '', category: 'plumber', price: '', priceType: 'fixed', 
+    location: { city: '', address: '', pincode: '', lat: null, lng: null },
   });
   const [formLoading, setFormLoading] = useState(false);
 
@@ -85,7 +86,7 @@ const ProviderDashboard = () => {
       }
       setShowServiceForm(false);
       setEditingService(null);
-      setServiceForm({ title: '', description: '', category: 'plumber', price: '', priceType: 'fixed', location: '' });
+      setServiceForm({ title: '', description: '', category: 'plumber', price: '', priceType: 'fixed', location: { city: '', address: '', pincode: '', lat: null, lng: null } });
       fetchServices();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to save service');
@@ -102,9 +103,31 @@ const ProviderDashboard = () => {
       category: service.category,
       price: service.price,
       priceType: service.priceType,
-      location: service.location,
+      location: typeof service.location === 'object' && service.location !== null 
+        ? service.location 
+        : { city: service.location || '', address: '', pincode: '', lat: null, lng: null },
     });
     setShowServiceForm(true);
+  };
+  
+  const handleFetchLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+    toast.loading('Detecting coordinates...', { id: 'geo' });
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setServiceForm(prev => ({
+          ...prev,
+          location: { ...prev.location, lat: pos.coords.latitude, lng: pos.coords.longitude }
+        }));
+        toast.success('Coordinates detected successfully!', { id: 'geo' });
+      },
+      (err) => {
+        toast.error('Location error: ' + err.message, { id: 'geo' });
+      }
+    );
   };
 
   const deleteService = async (id) => {
@@ -251,10 +274,12 @@ const ProviderDashboard = () => {
                             <HiClock className="w-5 h-5 text-[#45B1A8]" />
                             {booking.time}
                           </span>
-                          {booking.address && (
+                           {booking.address && (
                             <span className="flex items-start gap-2 sm:col-span-2">
                               <HiLocationMarker className="w-5 h-5 text-[#45B1A8] shrink-0 mt-0.5" />
-                              <span className="line-clamp-2">{booking.address}</span>
+                              <span className="line-clamp-2">
+                                {typeof booking.address === 'object' ? booking.address?.address : booking.address}
+                              </span>
                             </span>
                           )}
                         </div>
@@ -345,7 +370,7 @@ const ProviderDashboard = () => {
               <button
                 onClick={() => {
                   setEditingService(null);
-                  setServiceForm({ title: '', description: '', category: 'plumber', price: '', priceType: 'fixed', location: '' });
+                  setServiceForm({ title: '', description: '', category: 'plumber', price: '', priceType: 'fixed', location: { city: '', address: '', pincode: '', lat: null, lng: null } });
                   setShowServiceForm(!showServiceForm);
                 }}
                 className="bg-[#45B1A8] text-white px-6 py-2.5 rounded-full font-bold text-sm hover:bg-[#3a9990] hover:shadow-lg transition-all duration-300 flex items-center gap-2"
@@ -400,16 +425,49 @@ const ProviderDashboard = () => {
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-bold text-[#1A2B2A] mb-2 pl-1">Location</label>
-                    <input
-                      type="text"
-                      value={serviceForm.location}
-                      onChange={(e) => setServiceForm({ ...serviceForm, location: e.target.value })}
-                      className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
-                      placeholder="City / Area"
-                      required
-                    />
+                  <div className="sm:col-span-2 grid sm:grid-cols-2 gap-4 border p-4 rounded-3xl bg-gray-50/50">
+                    <div className="sm:col-span-2 flex justify-between items-center mb-1">
+                      <label className="block text-sm font-bold text-[#1A2B2A] pl-1">Location Details</label>
+                      <button
+                        type="button"
+                        onClick={handleFetchLocation}
+                        className="text-xs bg-[#45B1A8]/10 text-[#45B1A8] hover:bg-[#45B1A8]/20 px-3 py-1.5 rounded-full font-bold flex items-center gap-1 transition-colors"
+                      >
+                        <HiLocationMarker className="w-3.5 h-3.5" />
+                        {serviceForm.location?.lat ? "Coordinates Detected ✓" : "Detect Coordinates"}
+                      </button>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-1 pl-1">City</label>
+                      <input
+                        type="text"
+                        value={serviceForm.location?.city || ''}
+                        onChange={(e) => setServiceForm(prev => ({ ...prev, location: { ...prev.location, city: e.target.value } }))}
+                        className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
+                        placeholder="e.g. Mumbai"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-1 pl-1">Pincode</label>
+                      <input
+                        type="text"
+                        value={serviceForm.location?.pincode || ''}
+                        onChange={(e) => setServiceForm(prev => ({ ...prev, location: { ...prev.location, pincode: e.target.value } }))}
+                        className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
+                        placeholder="e.g. 400001"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-bold text-gray-500 mb-1 pl-1">Full Address</label>
+                      <input
+                        type="text"
+                        value={serviceForm.location?.address || ''}
+                        onChange={(e) => setServiceForm(prev => ({ ...prev, location: { ...prev.location, address: e.target.value } }))}
+                        className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
+                        placeholder="Complete service address..."
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-[#1A2B2A] mb-2 pl-1">Price (₹)</label>
@@ -464,7 +522,7 @@ const ProviderDashboard = () => {
                 <button
                   onClick={() => {
                     setEditingService(null);
-                    setServiceForm({ title: '', description: '', category: 'plumber', price: '', priceType: 'fixed', location: '' });
+                    setServiceForm({ title: '', description: '', category: 'plumber', price: '', priceType: 'fixed', location: { city: '', address: '', pincode: '', lat: null, lng: null } });
                     setShowServiceForm(true);
                   }}
                   className="bg-[#1A2B2A] text-white px-10 py-4 rounded-full font-bold hover:bg-black transition-colors shadow-md inline-flex items-center gap-2"
@@ -505,9 +563,13 @@ const ProviderDashboard = () => {
                         <span className="text-xl font-black text-[#1A2B2A]">₹{service.price}</span>
                         <span className="text-sm text-[#4A5568] font-medium">/ {service.priceType === 'hourly' ? 'hr' : 'job'}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-sm font-semibold text-[#4A5568] bg-[#F5FDFD] px-3 py-1.5 rounded-xl border border-[#E0F5F3]">
+                       <div className="flex items-center gap-1.5 text-sm font-semibold text-[#4A5568] bg-[#F5FDFD] px-3 py-1.5 rounded-xl border border-[#E0F5F3]">
                         <HiLocationMarker className="w-4 h-4 text-[#45B1A8]" />
-                        <span className="truncate max-w-[100px]">{service.location}</span>
+                        <span className="truncate max-w-[100px]">
+                          {typeof service.location === 'object' 
+                            ? (service.location?.address || service.location?.city || 'Location Details') 
+                            : (service.location || 'Unknown')}
+                        </span>
                       </div>
                     </div>
                   </div>

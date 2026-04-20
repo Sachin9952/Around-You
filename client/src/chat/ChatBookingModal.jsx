@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiXMark, HiOutlineShieldCheck, HiCalendar } from "react-icons/hi2";
 import API from "../api/axios";
+import BookingLocationPicker from "../components/BookingLocationPicker";
 
 
 const ChatBookingModal = ({ isOpen, onClose, providerId }) => {
@@ -10,7 +11,7 @@ const ChatBookingModal = ({ isOpen, onClose, providerId }) => {
   const [bookingService, setBookingService] = useState(null);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState({ address: '', lat: null, lng: null });
   const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -26,7 +27,7 @@ const ChatBookingModal = ({ isOpen, onClose, providerId }) => {
 
   const handleBook = async (e) => {
     e.preventDefault();
-    if (!bookingService || !date || !time || !address) return;
+    if (!bookingService || !date || !time || !address.lat) return;
 
     try {
       setSubmitLoading(true);
@@ -66,7 +67,7 @@ const ChatBookingModal = ({ isOpen, onClose, providerId }) => {
                 <HiCalendar className="w-6 h-6 text-primary-500" />
                 Book Service
               </h2>
-              <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-200">
+              <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition-colors">
                 <HiXMark className="w-5 h-5" />
               </button>
             </div>
@@ -108,18 +109,18 @@ const ChatBookingModal = ({ isOpen, onClose, providerId }) => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
                     <input type="date" required value={date} onChange={e => setDate(e.target.value)}
-                           className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                           className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
                     <input type="time" required value={time} onChange={e => setTime(e.target.value)}
-                           className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                           className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Service Address</label>
-                    <textarea required value={address} onChange={e => setAddress(e.target.value)} rows="3"
-                           className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" 
-                           placeholder="Enter your full address..." />
+                    <BookingLocationPicker 
+                      selectedLocation={address}
+                      onLocationChange={(loc) => setAddress(loc)}
+                    />
                   </div>
 
                   <div className="flex bg-primary-50 p-3 rounded-xl gap-3 !mt-6">

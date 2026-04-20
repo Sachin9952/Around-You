@@ -4,6 +4,7 @@ import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import StarRating from '../components/StarRating';
 import LoadingSpinner from '../components/LoadingSpinner';
+import BookingLocationPicker from '../components/BookingLocationPicker';
 import { HiStar, HiLocationMarker, HiCurrencyRupee, HiPhone, HiMail, HiCalendar, HiChatAlt2, HiCheckCircle, HiExclamation } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
@@ -31,7 +32,7 @@ const ServiceDetail = () => {
   const [bookingData, setBookingData] = useState({
     date: '',
     time: '',
-    address: '',
+    address: { address: '', lat: null, lng: null },
     notes: '',
   });
   const [bookingLoading, setBookingLoading] = useState(false);
@@ -80,7 +81,7 @@ const ServiceDetail = () => {
       });
       toast.success('Booking created successfully!');
       setShowBookingForm(false);
-      setBookingData({ date: '', time: '', address: '', notes: '' });
+      setBookingData({ date: '', time: '', address: { address: '', lat: null, lng: null }, notes: '' });
     } catch (err) {
       toast.error(err.response?.data?.error || 'Booking failed');
     } finally {
@@ -196,7 +197,7 @@ const ServiceDetail = () => {
                     <span className="text-sm uppercase tracking-wider font-bold text-gray-400 block mb-2">Location</span>
                     <div className="flex items-center gap-2 text-[#1A2B2A] font-semibold">
                       <HiLocationMarker className="w-5 h-5 text-[#45B1A8]" />
-                      {service.location}
+                      {typeof service.location === 'object' ? service.location?.address : service.location}
                     </div>
                   </div>
                 )}
@@ -335,14 +336,9 @@ const ServiceDetail = () => {
                 </select>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-[#1A2B2A] mb-2 pl-1">Service Address</label>
-                <input
-                  type="text"
-                  value={bookingData.address}
-                  onChange={(e) => setBookingData({ ...bookingData, address: e.target.value })}
-                  className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
-                  placeholder="Enter your full address"
-                  required
+                <BookingLocationPicker 
+                  selectedLocation={bookingData.address}
+                  onLocationChange={(loc) => setBookingData({ ...bookingData, address: loc })}
                 />
               </div>
               <div className="md:col-span-2">

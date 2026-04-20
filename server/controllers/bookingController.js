@@ -26,6 +26,17 @@ exports.createBooking = async (req, res, next) => {
   try {
     const { service: serviceId, date, time, notes, address } = req.body;
 
+    // Validate structured address
+    if (
+      !address ||
+      typeof address !== 'object' ||
+      !address.address ||
+      !address.lat ||
+      !address.lng
+    ) {
+      return next(new ErrorResponse('Please select a valid service location from the map.', 400));
+    }
+
     // Fetch the service to get the provider
     const service = await Service.findById(serviceId).populate('provider');
     if (!service) {

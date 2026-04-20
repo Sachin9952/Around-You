@@ -98,7 +98,7 @@ exports.getMe = async (req, res, next) => {
 // @access  Private
 exports.getUserById = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id).select('name avatar role');
+    const user = await User.findById(req.params.id).select('name avatar role isOnline lastSeen');
 
     if (!user) {
       return next(new ErrorResponse('User not found', 404));

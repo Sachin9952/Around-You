@@ -7,11 +7,13 @@ const {
   updateService,
   deleteService,
   getMyServices,
+  getNearbyServices,
 } = require('../controllers/serviceController');
 const { protect, authorize } = require('../middleware/auth');
 
 // Public routes
 router.get('/', getServices);
+router.get('/nearby', getNearbyServices);
 
 // Protected routes (provider only) — must come before /:id
 router.post('/', protect, authorize('provider'), createService);

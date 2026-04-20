@@ -51,10 +51,9 @@ const MessageBubble = memo(({ msg, isOwn }) => {
         {/* Bubble */}
         <div
           className={`relative px-4 py-2.5 max-w-[85%] sm:max-w-[75%] break-words
-            ${
-              isOwn
-                ? "bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-2xl rounded-br-md shadow-lg shadow-primary-600/20"
-                : "bg-dark-600/80 text-dark-50 rounded-2xl rounded-bl-md shadow-lg shadow-black/10 border border-dark-500/40"
+            ${isOwn
+              ? "bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-2xl rounded-br-md shadow-lg shadow-primary-600/20"
+              : "bg-dark-600/80 text-dark-50 rounded-2xl rounded-bl-md shadow-lg shadow-black/10 border border-dark-500/40"
             }
           `}
         >
@@ -92,14 +91,12 @@ const MessageBubble = memo(({ msg, isOwn }) => {
 
           {/* Timestamp + status row */}
           <div
-            className={`flex items-center gap-0.5 mt-1 ${
-              isOwn ? "justify-end" : "justify-start"
-            }`}
+            className={`flex items-center gap-0.5 mt-1 ${isOwn ? "justify-end" : "justify-start"
+              }`}
           >
             <span
-              className={`text-[10px] leading-none select-none ${
-                isOwn ? "text-white/60" : "text-dark-200/60"
-              }`}
+              className={`text-[10px] leading-none select-none ${isOwn ? "text-white/60" : "text-dark-200/60"
+                }`}
             >
               {msg.time}
             </span>
@@ -136,7 +133,7 @@ const MessageBubble = memo(({ msg, isOwn }) => {
               src={msg.fileUrl || msg.image}
               alt="shared full screen"
               className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl drop-shadow-2xl"
-              onClick={(e) => e.stopPropagation()} 
+              onClick={(e) => e.stopPropagation()}
             />
           </motion.div>
         )}

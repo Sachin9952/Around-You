@@ -4,7 +4,7 @@ const ErrorResponse = require('../utils/errorResponse');
 
 // Configure Cloudinary using env variables.
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dx8khsk8y', // Fallback to provided config from frontend
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY, 
   api_secret: process.env.CLOUDINARY_API_SECRET 
 });
@@ -32,8 +32,12 @@ exports.uploadChatAttachment = async (req, res, next) => {
       },
       (error, result) => {
         if (error) {
-          console.error("Cloudinary upload error:", error);
-          return next(new ErrorResponse('File upload failed', 500));
+          console.error("Cloudinary upload error details:", {
+            message: error.message,
+            http_code: error.http_code,
+            name: error.name
+          });
+          return next(new ErrorResponse(`File upload failed: ${error.message || 'Internal Error'}`, 500));
         }
         res.status(200).json({
           success: true,

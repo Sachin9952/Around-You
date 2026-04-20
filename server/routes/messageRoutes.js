@@ -76,7 +76,21 @@ router.get("/inbox", protect, async (req, res) => {
 router.get("/:roomId", protect, async (req, res) => {
   try {
     const messages = await Message.find({ conversationId: req.params.roomId }).sort({ createdAt: 1 });
-    res.json(messages);
+    
+    // Map DB fields to what the frontend expects
+    const formattedMessages = messages.map(m => ({
+      _id: m._id,
+      conversationId: m.conversationId,
+      senderId: m.sender.toString(),
+      receiverId: m.receiver.toString(),
+      type: m.type,
+      message: m.content, // Map content to message
+      fileUrl: m.fileUrl,
+      status: m.status,
+      time: new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    }));
+
+    res.json(formattedMessages);
   } catch (error) {
     res.status(500).json({ success: false, error: 'Server Error' });
   }

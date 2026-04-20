@@ -35,7 +35,10 @@ const InputBox = ({ onSend, onAttachmentSend, onTyping }) => {
 
   const handleSend = () => {
     if (attachmentFile) {
-      const type = attachmentFile.type === 'application/pdf' ? 'pdf' : 'image';
+      let type = 'image';
+      if (attachmentFile.type === 'application/pdf') type = 'pdf';
+      else if (attachmentFile.type.startsWith('audio/')) type = 'voice';
+      
       onAttachmentSend?.(attachmentFile, type);
       clearAttachment();
     }
@@ -89,7 +92,10 @@ const InputBox = ({ onSend, onAttachmentSend, onTyping }) => {
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const audioFile = new File([audioBlob], "voice_message.webm", { type: 'audio/webm' });
-        onAttachmentSend?.(audioFile, 'voice');
+        
+        // Stop auto-sending. Instead, set it as an attachment for review/manual sending.
+        setAttachmentFile(audioFile);
+        setAttachmentPreview("voice_preview"); // Special flag for voice preview UI
         clearTimer();
       };
 
@@ -134,6 +140,11 @@ const InputBox = ({ onSend, onAttachmentSend, onTyping }) => {
                 {attachmentFile?.type === "application/pdf" ? (
                   <div className="h-20 w-20 flex items-center justify-center bg-gray-700 rounded-xl border border-dark-500/50">
                     <span className="text-white text-xs font-bold">PDF</span>
+                  </div>
+                ) : attachmentPreview === "voice_preview" ? (
+                  <div className="h-20 w-20 flex flex-col items-center justify-center bg-primary-500/20 rounded-xl border border-primary-500/30 text-primary-400">
+                    <HiOutlineMicrophone className="w-8 h-8 mb-1" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Voice</span>
                   </div>
                 ) : (
                   <img src={attachmentPreview} alt="Preview" className="h-20 w-20 object-cover rounded-xl border border-dark-500/50" />
