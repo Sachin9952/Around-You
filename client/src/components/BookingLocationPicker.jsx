@@ -57,7 +57,10 @@ const BookingLocationPicker = ({ selectedLocation, onLocationChange }) => {
       );
       const data = await response.json();
       const address = data.display_name || `Location at ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-      onLocationChange({ address, lat, lng });
+      const addressObj = data.address || {};
+      const city = addressObj.city || addressObj.town || addressObj.village || addressObj.state_district || '';
+      const pincode = addressObj.postcode || '';
+      onLocationChange({ address, lat, lng, city, pincode });
     } catch (err) {
       console.error('Reverse geocoding failed:', err);
       onLocationChange({ 
@@ -118,8 +121,10 @@ const BookingLocationPicker = ({ selectedLocation, onLocationChange }) => {
           scrollWheelZoom={true}
         >
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+            subdomains="abcd"
+            maxZoom={20}
           />
           <MapClickHandler onLocationSelect={reverseGeocode} />
           <RecenterMap center={selectedLocation.lat ? [selectedLocation.lat, selectedLocation.lng] : null} />
@@ -140,9 +145,9 @@ const BookingLocationPicker = ({ selectedLocation, onLocationChange }) => {
         </MapContainer>
         
         {!selectedLocation.lat && (
-          <div className="absolute inset-0 z-[1000] bg-white/40 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
-            <div className="bg-white/90 px-4 py-2 rounded-full shadow-md border border-[#E0F5F3]">
-              <span className="text-xs font-bold text-[#4A5568]">Click the map or auto-detect to select location</span>
+          <div className="absolute inset-0 z-[1000] flex items-center justify-center pointer-events-none">
+            <div className="bg-white/95 px-5 py-2.5 rounded-full shadow-lg border border-[#E0F5F3] animate-bounce">
+              <span className="text-xs font-extrabold text-[#45B1A8] uppercase tracking-wider">Click map to select location</span>
             </div>
           </div>
         )}

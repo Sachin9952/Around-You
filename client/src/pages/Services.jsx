@@ -168,7 +168,7 @@ const Services = () => {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: 1000, opacity: 0 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-                className="hidden lg:block flex-1 sticky top-[calc(20rem)] h-[calc(100vh-160px)] p-6 pl-0"
+                className="hidden lg:block flex-1 h-[calc(100vh-160px)] py-4 pr-4"
               >
                 <MapPanel
                   services={services}

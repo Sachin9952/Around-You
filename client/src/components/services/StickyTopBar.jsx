@@ -24,7 +24,7 @@ const StickyTopBar = ({ filters, updateFilter, onDetectLocation }) => {
           placeholder="City..."
           value={filters.city || ''}
           onChange={(e) => updateFilter('city', e.target.value)}
-          className="bg-transparent border-none focus:ring-0 text-xs md:text-sm font-medium w-full py-2 px-1 md:px-2 text-slate-900 placeholder-slate-400 h-full"
+          className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-xs md:text-sm font-medium w-full py-2 px-1 md:px-2 text-slate-900 placeholder-slate-400 h-full"
         />
         <button
           onClick={onDetectLocation}
@@ -43,7 +43,7 @@ const StickyTopBar = ({ filters, updateFilter, onDetectLocation }) => {
           placeholder="Search..."
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
-          className="bg-transparent border-none focus:ring-0 text-xs md:text-sm font-medium w-full py-2 px-1 md:px-2 text-slate-900 placeholder-slate-400 h-full"
+          className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-xs md:text-sm font-medium w-full py-2 px-1 md:px-2 text-slate-900 placeholder-slate-400 h-full"
         />
         {localSearch && (
           <button type="button" onClick={clearSearch} className="p-0.5 hover:text-[#45B1A8] text-slate-400">

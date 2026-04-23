@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import BookingLocationPicker from '../components/BookingLocationPicker';
 import { HiPlus, HiPencil, HiTrash, HiCheck, HiX, HiClock, HiExclamation, HiChatAlt2, HiCalendar, HiLocationMarker, HiCurrencyRupee, HiBriefcase } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
@@ -110,25 +111,7 @@ const ProviderDashboard = () => {
     setShowServiceForm(true);
   };
   
-  const handleFetchLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error('Geolocation is not supported by your browser');
-      return;
-    }
-    toast.loading('Detecting coordinates...', { id: 'geo' });
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setServiceForm(prev => ({
-          ...prev,
-          location: { ...prev.location, lat: pos.coords.latitude, lng: pos.coords.longitude }
-        }));
-        toast.success('Coordinates detected successfully!', { id: 'geo' });
-      },
-      (err) => {
-        toast.error('Location error: ' + err.message, { id: 'geo' });
-      }
-    );
-  };
+
 
   const deleteService = async (id) => {
     if (!confirm('Are you sure you want to delete this service?')) return;
@@ -426,16 +409,26 @@ const ProviderDashboard = () => {
                     </select>
                   </div>
                   <div className="sm:col-span-2 grid sm:grid-cols-2 gap-4 border p-4 rounded-3xl bg-gray-50/50">
-                    <div className="sm:col-span-2 flex justify-between items-center mb-1">
-                      <label className="block text-sm font-bold text-[#1A2B2A] pl-1">Location Details</label>
-                      <button
-                        type="button"
-                        onClick={handleFetchLocation}
-                        className="text-xs bg-[#45B1A8]/10 text-[#45B1A8] hover:bg-[#45B1A8]/20 px-3 py-1.5 rounded-full font-bold flex items-center gap-1 transition-colors"
-                      >
-                        <HiLocationMarker className="w-3.5 h-3.5" />
-                        {serviceForm.location?.lat ? "Coordinates Detected ✓" : "Detect Coordinates"}
-                      </button>
+                    <div className="sm:col-span-2 mb-2">
+                      <BookingLocationPicker 
+                        selectedLocation={serviceForm.location}
+                        onLocationChange={(loc) => {
+                          setServiceForm(prev => ({
+                            ...prev,
+                            location: {
+                              ...prev.location,
+                              lat: loc.lat,
+                              lng: loc.lng,
+                              address: loc.address || prev.location.address,
+                              city: loc.city || prev.location.city,
+                              pincode: loc.pincode || prev.location.pincode
+                            }
+                          }));
+                        }}
+                      />
+                    </div>
+                    <div className="sm:col-span-2 pt-2 border-t border-gray-200">
+                      <p className="text-xs text-gray-500 font-medium mb-3">You can manually refine the location details below if needed:</p>
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 mb-1 pl-1">City</label>
