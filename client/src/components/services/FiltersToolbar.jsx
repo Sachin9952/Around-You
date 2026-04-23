@@ -27,6 +27,7 @@ const FiltersToolbar = ({
             onViewChange={onViewChange}
             resultCount={resultCount}
             loading={loading}
+            id="desktop"
           />
         </div>
       </div>
@@ -53,6 +54,7 @@ const FiltersToolbar = ({
             onViewChange={onViewChange}
             resultCount={resultCount}
             loading={loading}
+            id="mobile"
           />
         </div>
       </div>

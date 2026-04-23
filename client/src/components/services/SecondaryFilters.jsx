@@ -4,7 +4,7 @@ import ViewToggle from './ViewToggle';
 
 const categories = ['plumber', 'electrician', 'cleaner', 'painter', 'carpenter', 'mechanic', 'tutor', 'other'];
 
-const SecondaryFilters = ({ filters, updateFilter, viewMode, onViewChange, resultCount, loading }) => {
+const SecondaryFilters = ({ filters, updateFilter, viewMode, onViewChange, resultCount, loading, id = 'default' }) => {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const sortRef = useRef(null);
 
@@ -80,7 +80,7 @@ const SecondaryFilters = ({ filters, updateFilter, viewMode, onViewChange, resul
 
         {/* View Toggle */}
         <div className="shrink-0">
-          <ViewToggle viewMode={viewMode} onViewChange={onViewChange} />
+          <ViewToggle viewMode={viewMode} onViewChange={onViewChange} id={id} />
         </div>
 
         {/* Results Info */}

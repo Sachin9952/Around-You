@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { HiViewList, HiMap } from 'react-icons/hi';
 
-const ViewToggle = ({ viewMode, onViewChange }) => {
+const ViewToggle = ({ viewMode, onViewChange, id = 'default' }) => {
   return (
     <div className="flex bg-slate-100 p-1 rounded-xl">
       <button
@@ -12,7 +12,7 @@ const ViewToggle = ({ viewMode, onViewChange }) => {
       >
         {viewMode === 'list' && (
           <motion.div
-            layoutId="active-toggle"
+            layoutId={`active-toggle-${id}`}
             className="absolute inset-0 bg-[#45B1A8] rounded-lg -z-10"
             transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
           />
@@ -29,7 +29,7 @@ const ViewToggle = ({ viewMode, onViewChange }) => {
       >
         {viewMode === 'map' && (
           <motion.div
-            layoutId="active-toggle"
+            layoutId={`active-toggle-${id}`}
             className="absolute inset-0 bg-[#45B1A8] rounded-lg -z-10"
             transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
           />
