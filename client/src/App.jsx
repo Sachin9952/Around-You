@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
@@ -42,7 +42,7 @@ const AnimatedRoutes = () => {
         <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
         <Route path="/provider/register" element={<PageTransition><ProviderRegister /></PageTransition>} />
         <Route path="/services" element={<PageTransition><Services /></PageTransition>} />
-        <Route path="/nearby" element={<PageTransition><NearbyServices /></PageTransition>} />
+        <Route path="/nearby" element={<Navigate to="/services?v=map" replace />} />
         <Route path="/services/:id" element={<PageTransition><ServiceDetail /></PageTransition>} />
         <Route path="/chat/:providerId" element={<PageTransition><ChatPage /></PageTransition>} />
         <Route path="/chat-demo" element={<PageTransition><ChatDemo /></PageTransition>} />
@@ -138,11 +138,11 @@ function App() {
     if (!API_URL) return;
 
     // Ping immediately on mount so the server wakes up early
-    fetch(`${API_URL}/api/health`).catch(() => {});
+    fetch(`${API_URL}/api/health`).catch(() => { });
 
     // Then ping every 14 minutes to keep it awake
     const keepAlive = setInterval(() => {
-      fetch(`${API_URL}/api/health`).catch(() => {});
+      fetch(`${API_URL}/api/health`).catch(() => { });
     }, 14 * 60 * 1000);
 
     return () => clearInterval(keepAlive);
@@ -152,9 +152,9 @@ function App() {
     <Router>
       <AuthProvider>
         <MotionConfig transition={{ duration: 0.3, ease: 'easeInOut' }}>
-          <div className="min-h-screen bg-dark-900 flex flex-col">
+          <div className="min-h-screen bg-slate-50 flex flex-col">
             <Navbar />
-            <main className="flex-1 overflow-x-hidden">
+            <main className="flex-1">
               <AnimatedRoutes />
             </main>
             <Footer />
