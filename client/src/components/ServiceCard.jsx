@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
 import { HiOutlineBookmark } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const ServiceCard = ({ service }) => {
+  const { user } = useAuth();
   return (
     <motion.div
       whileHover={{ y: -4, scale: 1.01 }}
@@ -81,7 +83,7 @@ const ServiceCard = ({ service }) => {
               to={`/services/${service._id || '#'}`}
               className="bg-gray-900 text-white hover:bg-gray-800 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors"
             >
-              Book Now
+              {user?.role === 'provider' ? 'View Service' : 'Book Now'}
             </Link>
           )}
         </div>

@@ -248,8 +248,8 @@ const ServiceDetail = () => {
                   </div>
                 </div>
 
-                {/* Chat with Provider Button */}
-                {user && user._id !== service.provider._id && service.isBookable !== false && (
+                {/* Chat with Provider Button — hidden for providers */}
+                {user && user?.role !== 'provider' && user._id !== service.provider._id && service.isBookable !== false && (
                   <button
                     className="w-full bg-white border-2 border-[#45B1A8] text-[#45B1A8] hover:bg-[#45B1A8] hover:text-white px-6 py-3 rounded-full font-bold transition-colors inline-flex items-center justify-center gap-2"
                     onClick={() => navigate(`/chat/${service.provider._id}`)}

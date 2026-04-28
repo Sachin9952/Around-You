@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
 import { HiStar, HiLocationMarker, HiOutlineHeart, HiShieldCheck } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const ServiceCard = ({ service, isHighlighted, onHover }) => {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -109,7 +111,7 @@ const ServiceCard = ({ service, isHighlighted, onHover }) => {
               : 'bg-slate-100 text-slate-400 cursor-not-allowed'
           }`}
         >
-          {service.isBookable ? 'Book Now' : 'Unavailable'}
+          {!service.isBookable ? 'Unavailable' : user?.role === 'provider' ? 'View Service' : 'Book Now'}
         </button>
       </div>
     </motion.div>

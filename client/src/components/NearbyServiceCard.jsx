@@ -17,7 +17,7 @@ const categoryImages = {
 
 const NearbyServiceCard = ({ service, onHover }) => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const handleBook = (e) => {
     e.stopPropagation();
@@ -98,7 +98,7 @@ const NearbyServiceCard = ({ service, onHover }) => {
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
             }`}
           >
-            Book
+            {!service.isBookable ? 'N/A' : user?.role === 'provider' ? 'View' : 'Book'}
           </button>
         </div>
       </div>
