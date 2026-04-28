@@ -112,54 +112,54 @@ exports.getNearbyServices = async (req, res, next) => {
     if (category) query.category = category;
     if (search) query.$text = { $search: search };
 
-    // Fetch all prospective active services populated with provider
-    let services = await Service.find(query).populate('provider', 'name email phone avatar isActive');
+    // Fetch prospective active services with lean() for performance
+    const services = await Service.find(query)
+      .populate('provider', 'name email phone avatar isActive')
+      .lean();
 
-    // Filter bookable services, applying manual location fallbacks if coordinates missing
-    let validServices = services.reduce((acc, s) => {
-      const obj = s.toObject();
-      obj.isBookable = Boolean(
-        obj.isActive && 
-        !obj.isArchived && 
-        !obj.providerDeleted &&
-        obj.provider && 
-        obj.provider.isActive !== false
-      );
+    // Filter bookable services and calculate distances efficiently
+    const validServices = services.reduce((acc, service) => {
+      const isProviderActive = service.provider && service.provider.isActive !== false;
+      const isBookable = service.isActive && !service.isArchived && !service.providerDeleted && isProviderActive;
 
-      // Only return valid providers' active services
-      if (!obj.isBookable) return acc;
+      if (!isBookable) return acc;
+
+      const updatedService = { ...service, isBookable };
 
       // Distance calculation if querying by lat/lng
       if (lat && lng) {
-        if (obj.location && typeof obj.location === 'object' && obj.location.lat && obj.location.lng) {
+        const { location } = service;
+        if (location && typeof location === 'object' && location.lat && location.lng) {
           const distance = calculateDistanceKm(
-            Number(lat), Number(lng), 
-            Number(obj.location.lat), Number(obj.location.lng)
+            Number(lat), 
+            Number(lng), 
+            Number(location.lat), 
+            Number(location.lng)
           );
           if (distance !== null) {
-            obj.distanceKm = distance;
-            acc.push(obj);
+            updatedService.distanceKm = distance;
+            acc.push(updatedService);
           }
         }
       } 
       // Fallback search by string match if no lat/lng provided (manual search)
       else if (city || pincode) {
-        // Safe check for mixed schema
-        if (typeof obj.location === 'string') {
-          const locLow = obj.location.toLowerCase();
+        const { location } = service;
+        if (typeof location === 'string') {
+          const locLow = location.toLowerCase();
           if ((city && locLow.includes(city.toLowerCase())) || (pincode && locLow.includes(pincode))) {
-            acc.push(obj);
+            acc.push(updatedService);
           }
-        } else if (typeof obj.location === 'object') {
-          const cLow = (obj.location.city || '').toLowerCase();
-          const pLow = (obj.location.pincode || '').toLowerCase();
+        } else if (typeof location === 'object') {
+          const cLow = (location.city || '').toLowerCase();
+          const pLow = (location.pincode || '').toLowerCase();
           if ((city && cLow.includes(city.toLowerCase())) || (pincode && pLow === pincode)) {
-            acc.push(obj);
+            acc.push(updatedService);
           }
         }
       } else {
         // If no location parameters passed, return everything (base behavior)
-        acc.push(obj);
+        acc.push(updatedService);
       }
       return acc;
     }, []);

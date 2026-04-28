@@ -1,7 +1,17 @@
 import axios from 'axios';
 
+const getBaseURL = () => {
+  const url = import.meta.env.VITE_API_URL;
+  if (!url) {
+    console.warn('VITE_API_URL is not defined. Falling back to current origin.');
+    return '/api';
+  }
+  // Remove trailing slash if present to prevent double slashes with /api
+  return `${url.replace(/\/$/, '')}/api`;
+};
+
 const API = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/api`,
+  baseURL: getBaseURL(),
 });
 
 

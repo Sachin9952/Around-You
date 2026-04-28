@@ -21,22 +21,42 @@ const server = http.createServer(app);
 // ─── 3. Body parser & CORS (BEFORE routes) ───
 app.use(express.json());
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://around-you-ten.vercel.app",
+  "https://around-ml4ffvu34-sachin-singh-akhawats-projects.vercel.app"
+];
+
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://around-you-ten.vercel.app"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
+  origin: function (origin, callback) {
+    // In production, we allow specific origins or any vercel.app subdomain
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked for origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
+// Explicitly handle preflight requests
+app.options('*', cors());
 
 // ─── 4. Socket.IO setup ───
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      "https://around-you-ten.vercel.app"
-    ],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      const isVercel = origin.endsWith(".vercel.app");
+      if (allowedOrigins.indexOf(origin) !== -1 || isVercel) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST"],
     credentials: true
   }
