@@ -20,8 +20,13 @@ const supportRequestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'resolved'],
+      enum: ['pending', 'in-review', 'resolved'],
       default: 'pending',
+    },
+    adminReply: {
+      type: String,
+      maxlength: [1000, 'Reply cannot be more than 1000 characters'],
+      default: '',
     },
   },
   {

@@ -1,5 +1,6 @@
 const SupportRequest = require('../models/SupportRequest');
 const Notification = require('../models/Notification');
+const User = require('../models/User');
 const ErrorResponse = require('../utils/errorResponse');
 
 // @desc    Create a support request (complaint/suggestion)
@@ -10,6 +11,19 @@ exports.createSupportRequest = async (req, res, next) => {
     req.body.user = req.user.id;
 
     const request = await SupportRequest.create(req.body);
+
+    // Notify all admin users about the new complaint
+    const admins = await User.find({ role: 'admin' }).select('_id');
+
+    if (admins.length > 0) {
+      const adminNotifications = admins.map((admin) => ({
+        recipient: admin._id,
+        title: 'New Support Request',
+        message: `${req.user.name} submitted a complaint: "${request.subject}"`,
+      }));
+
+      await Notification.insertMany(adminNotifications);
+    }
 
     res.status(201).json({
       success: true,
@@ -50,14 +64,23 @@ exports.resolveSupportRequest = async (req, res, next) => {
       return next(new ErrorResponse(`Support request not found with id of ${req.params.id}`, 404));
     }
 
+    const { adminReply } = req.body;
+
     request.status = 'resolved';
+    if (adminReply) {
+      request.adminReply = adminReply;
+    }
     await request.save();
 
     // Notify the user that their support request was resolved by the admin
+    const replyText = adminReply
+      ? `\n\nAdmin Response: "${adminReply}"`
+      : '';
+
     await Notification.create({
       recipient: request.user,
-      title: 'Support Request Resolved',
-      message: `Your complaint/request regarding "${request.subject}" has been successfully resolved by the administration team.`,
+      title: 'Support Request Resolved ✅',
+      message: `Your complaint/request regarding "${request.subject}" has been successfully resolved by the administration team.${replyText}`,
     });
 
     res.status(200).json({

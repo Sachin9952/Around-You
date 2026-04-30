@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   HiMenu, HiX, HiUser, HiLogout, HiViewGrid,
-  HiBell, HiCog, HiChatAlt2, HiOutlineShoppingCart
+  HiBell, HiCog, HiChatAlt2, HiOutlineShoppingCart, HiSupport
 } from 'react-icons/hi';
 
 const Navbar = () => {
@@ -127,6 +127,11 @@ const Navbar = () => {
                         <Link to="/notifications" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[#4A5568] hover:text-[#1A2B2A] hover:bg-gray-50 rounded-xl transition-colors font-medium">
                           <HiBell className="w-4 h-4 text-gray-400" /> Notifications
                         </Link>
+                        {user?.role !== 'admin' && (
+                          <Link to="/post-request" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[#4A5568] hover:text-[#1A2B2A] hover:bg-gray-50 rounded-xl transition-colors font-medium">
+                            <HiSupport className="w-4 h-4 text-gray-400" /> Support
+                          </Link>
+                        )}
                         <Link to="/settings" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[#4A5568] hover:text-[#1A2B2A] hover:bg-gray-50 rounded-xl transition-colors font-medium">
                           <HiCog className="w-4 h-4 text-gray-400" /> Settings
                         </Link>
@@ -215,6 +220,11 @@ const Navbar = () => {
                     <Link to="/inbox" onClick={() => setIsOpen(false)} className="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors">
                       <HiChatAlt2 className="w-4 h-4 text-gray-500" /> <span className="text-sm font-bold text-[#4A5568]">Chats</span>
                     </Link>
+                    {user?.role !== 'admin' && (
+                      <Link to="/post-request" onClick={() => setIsOpen(false)} className="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors col-span-2">
+                        <HiSupport className="w-4 h-4 text-gray-500" /> <span className="text-sm font-bold text-[#4A5568]">Support / Complaints</span>
+                      </Link>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between px-3 pt-3 border-t border-gray-100">
