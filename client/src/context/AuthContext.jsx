@@ -81,6 +81,17 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Allow components to update user state + localStorage after server-confirmed changes
+  // (e.g., role upgrade, profile update) without requiring a full re-login
+  const updateUser = (newUser, newToken) => {
+    setUser(newUser);
+    localStorage.setItem('user', JSON.stringify(newUser));
+    if (newToken) {
+      setToken(newToken);
+      localStorage.setItem('token', newToken);
+    }
+  };
+
   const value = {
     user,
     token,
@@ -88,6 +99,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated: !!token && !!user,
   };
 

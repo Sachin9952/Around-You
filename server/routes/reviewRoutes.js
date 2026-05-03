@@ -6,7 +6,7 @@ const { protect, authorize } = require('../middleware/auth');
 // Public
 router.get('/service/:serviceId', getServiceReviews);
 
-// Customer only
-router.post('/', protect, authorize('customer'), createReview);
+// Customer & Provider can leave reviews
+router.post('/', protect, authorize('customer', 'provider'), createReview);
 
 module.exports = router;

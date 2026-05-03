@@ -188,6 +188,42 @@ exports.updatePassword = async (req, res, next) => {
   }
 };
 
+// @desc    Convert customer account to provider
+// @route   PATCH /api/auth/become-provider
+// @access  Private (Customer only)
+exports.becomeProvider = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return next(new ErrorResponse('User not found', 404));
+    }
+
+    if (user.role === 'provider') {
+      return next(new ErrorResponse('You are already a provider', 400));
+    }
+
+    if (user.role === 'admin') {
+      return next(new ErrorResponse('Admin accounts cannot be converted', 400));
+    }
+
+    const { phone } = req.body;
+
+    if (!phone || phone.trim().length === 0) {
+      return next(new ErrorResponse('Phone number is required to become a provider', 400));
+    }
+
+    user.role = 'provider';
+    user.phone = phone.trim();
+    await user.save();
+
+    // Return fresh token + updated user so client can re-authenticate instantly
+    sendTokenResponse(user, 200, res);
+  } catch (err) {
+    next(err);
+  }
+};
+
 // @desc    Delete user account (and cascade-delete provider's services, bookings & reviews)
 // @route   DELETE /api/auth/deleteaccount
 // @access  Private

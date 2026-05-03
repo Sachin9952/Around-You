@@ -83,7 +83,7 @@ const ServiceCard = ({ service }) => {
               to={`/services/${service._id || '#'}`}
               className="bg-gray-900 text-white hover:bg-gray-800 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors"
             >
-              {user?.role === 'provider' ? 'View Service' : 'Book Now'}
+              {user?.role === 'provider' && user?._id === service.provider?._id ? 'View Service' : 'Book Now'}
             </Link>
           )}
         </div>

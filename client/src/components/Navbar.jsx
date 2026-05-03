@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   HiMenu, HiX, HiUser, HiLogout, HiViewGrid,
-  HiBell, HiCog, HiChatAlt2, HiOutlineShoppingCart, HiSupport
+  HiBell, HiCog, HiChatAlt2, HiOutlineShoppingCart, HiSupport,
+  HiSparkles, HiBriefcase
 } from 'react-icons/hi';
 
 const Navbar = () => {
@@ -48,9 +49,18 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'Services', path: '/services' },
     { name: 'Categories', path: '/services?category=all' },
-    { name: 'Providers', path: '/provider/register' },
     { name: 'About', path: '/about' }
   ];
+
+  // Role-based CTA config
+  const getProviderCTA = () => {
+    if (user?.role === 'admin') return null;
+    if (user?.role === 'provider') {
+      return { label: 'My Services', path: '/provider/dashboard', icon: HiBriefcase, style: 'outline' };
+    }
+    return { label: 'List Your Service', path: '/become-provider', icon: HiSparkles, style: 'filled' };
+  };
+  const providerCTA = getProviderCTA();
 
   return (
     <nav className="bg-[#F5FDFD]/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100/50">
@@ -68,7 +78,7 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Center Links */}
-          <div className="hidden md:flex flex-1 items-center justify-center gap-8">
+          <div className="hidden md:flex flex-1 items-center justify-center gap-7">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path || (link.path.includes('?') && location.search.includes('category=all'));
               return (
@@ -81,6 +91,22 @@ const Navbar = () => {
                 </Link>
               );
             })}
+            {/* Provider CTA Button */}
+            {providerCTA && (
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <Link
+                  to={providerCTA.path}
+                  className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 ${
+                    providerCTA.style === 'filled'
+                      ? 'bg-[#45B1A8] text-white shadow-md shadow-[#45B1A8]/20 hover:bg-[#3a9990] hover:shadow-lg hover:shadow-[#45B1A8]/30'
+                      : 'bg-white text-[#45B1A8] border border-[#45B1A8]/30 hover:bg-[#F5FDFD] hover:border-[#45B1A8]/50 shadow-sm'
+                  }`}
+                >
+                  <providerCTA.icon className="w-4 h-4" />
+                  {providerCTA.label}
+                </Link>
+              </motion.div>
+            )}
           </div>
 
           {/* Desktop Right Nav */}
@@ -200,6 +226,22 @@ const Navbar = () => {
                    {link.name}
                  </Link>
               ))}
+
+              {/* Mobile Provider CTA */}
+              {providerCTA && (
+                <Link
+                  to={providerCTA.path}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-base font-bold transition-all mt-1 ${
+                    providerCTA.style === 'filled'
+                      ? 'bg-gradient-to-r from-[#45B1A8] to-emerald-500 text-white shadow-md'
+                      : 'bg-[#F5FDFD] text-[#45B1A8] border border-[#E0F5F3]'
+                  }`}
+                >
+                  <providerCTA.icon className="w-5 h-5" />
+                  {providerCTA.label}
+                </Link>
+              )}
 
               {isAuthenticated ? (
                 <div className="pt-4 border-t border-gray-100 mt-2">

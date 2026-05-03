@@ -1,8 +1,21 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { HiArrowRight } from 'react-icons/hi';
+import { useAuth } from '../../context/AuthContext';
 
 const HeroSection = () => {
+  const { user } = useAuth();
+
+  // Role-based secondary CTA config
+  const getSecondaryCTA = () => {
+    if (user?.role === 'provider') {
+      return { label: 'Add New Service', path: '/provider/dashboard?tab=services&action=add' };
+    }
+    // Guests & customers
+    return { label: 'List Your Service', path: '/become-provider' };
+  };
+  const secondaryCTA = getSecondaryCTA();
+
   return (
     <div className="relative overflow-hidden bg-[#F5FDFD] pt-12 lg:pt-24 pb-32 lg:pb-48">
       {/* Background decoration */}
@@ -37,8 +50,8 @@ const HeroSection = () => {
                 </Link>
               </motion.div>
               <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
-                <Link to="/provider/register" className="flex items-center justify-center gap-2 bg-white text-[#1A2B2A] border border-gray-200 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-gray-50 hover:shadow-md transition-all w-full">
-                  Become a Provider
+                <Link to={secondaryCTA.path} className="flex items-center justify-center gap-2 bg-white text-[#1A2B2A] border border-gray-200 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-gray-50 hover:shadow-md transition-all w-full">
+                  {secondaryCTA.label}
                 </Link>
               </motion.div>
             </div>

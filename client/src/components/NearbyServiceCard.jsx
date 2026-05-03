@@ -98,7 +98,7 @@ const NearbyServiceCard = ({ service, onHover }) => {
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
             }`}
           >
-            {!service.isBookable ? 'N/A' : user?.role === 'provider' ? 'View' : 'Book'}
+            {!service.isBookable ? 'N/A' : 'Book'}
           </button>
         </div>
       </div>

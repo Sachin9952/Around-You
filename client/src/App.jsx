@@ -26,6 +26,7 @@ import AdminSupport from './pages/AdminSupport';
 import Settings from './pages/Settings';
 import PostRequest from './pages/PostRequest';
 import Notifications from './pages/Notifications';
+import BecomeProvider from './pages/BecomeProvider';
 import Footer from './components/Footer';
 import CardsDemo from './pages/CardsDemo';
 
@@ -47,13 +48,14 @@ const AnimatedRoutes = () => {
         <Route path="/chat/:providerId" element={<PageTransition><ChatPage /></PageTransition>} />
         <Route path="/chat-demo" element={<PageTransition><ChatDemo /></PageTransition>} />
         <Route path="/cards-demo" element={<PageTransition><CardsDemo /></PageTransition>} />
+        <Route path="/become-provider" element={<PageTransition><BecomeProvider /></PageTransition>} />
         <Route path="/inbox" element={<ProtectedRoute><PageTransition><Inbox /></PageTransition></ProtectedRoute>} />
 
-        {/* Customer Routes */}
+        {/* Customer Routes (providers can also view their bookings) */}
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute roles={['customer']}>
+            <ProtectedRoute roles={['customer', 'provider']}>
               <PageTransition><CustomerDashboard /></PageTransition>
             </ProtectedRoute>
           }

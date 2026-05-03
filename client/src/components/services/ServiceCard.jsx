@@ -111,7 +111,7 @@ const ServiceCard = ({ service, isHighlighted, onHover }) => {
               : 'bg-slate-100 text-slate-400 cursor-not-allowed'
           }`}
         >
-          {!service.isBookable ? 'Unavailable' : user?.role === 'provider' ? 'View Service' : 'Book Now'}
+          {!service.isBookable ? 'Unavailable' : 'Book Now'}
         </button>
       </div>
     </motion.div>

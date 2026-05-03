@@ -204,7 +204,7 @@ const ServiceDetail = () => {
               </div>
 
               {/* Book Button (Desktop Placement) */}
-              {user?.role === 'customer' && service.isBookable !== false && (
+              {user && user._id !== service.provider?._id && service.isBookable !== false && (
                 <div className="hidden lg:block mt-8">
                   <button
                     onClick={() => setShowBookingForm(!showBookingForm)}
@@ -248,8 +248,8 @@ const ServiceDetail = () => {
                   </div>
                 </div>
 
-                {/* Chat with Provider Button — hidden for providers */}
-                {user && user?.role !== 'provider' && user._id !== service.provider._id && service.isBookable !== false && (
+                {/* Chat with Provider Button — hidden for own service */}
+                {user && user._id !== service.provider._id && service.isBookable !== false && (
                   <button
                     className="w-full bg-white border-2 border-[#45B1A8] text-[#45B1A8] hover:bg-[#45B1A8] hover:text-white px-6 py-3 rounded-full font-bold transition-colors inline-flex items-center justify-center gap-2"
                     onClick={() => navigate(`/chat/${service.provider._id}`)}
@@ -278,7 +278,7 @@ const ServiceDetail = () => {
             )}
             
             {/* Book Button (Mobile Placement) */}
-            {user?.role === 'customer' && service.isBookable !== false && (
+            {user && user._id !== service.provider?._id && service.isBookable !== false && (
               <div className="block lg:hidden w-full mt-4">
                 <button
                   onClick={() => setShowBookingForm(!showBookingForm)}
@@ -367,7 +367,7 @@ const ServiceDetail = () => {
           </h2>
 
           {/* Review Form */}
-          {user?.role === 'customer' && (
+          {user && user.role !== 'admin' && (
             <form onSubmit={handleReview} className="bg-[#F5FDFD] p-6 sm:p-8 rounded-[2rem] border border-[#E0F5F3] mb-10">
               <h3 className="text-lg font-bold text-[#1A2B2A] mb-4">Share Your Experience</h3>
               <div className="mb-4 bg-white inline-flex px-4 py-2 rounded-full border border-[#E0F5F3]">
