@@ -18,16 +18,14 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// ─── 3. Body parser & CORS (BEFORE routes) ───
-app.use(express.json());
-
+// ─── 3. CORS & Body parser (BEFORE routes) ───
 const allowedOrigins = [
   "http://localhost:5173",
   "https://around-you-ten.vercel.app",
   "https://around-ml4ffvu34-sachin-singh-akhawats-projects.vercel.app"
 ];
 
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
     // In production, we allow specific origins or any vercel.app subdomain
     if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
@@ -39,11 +37,14 @@ app.use(cors({
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+  allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With"],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
 
-// Explicitly handle preflight requests
-app.options('*', cors());
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle all preflight requests
+app.use(express.json());
 
 // ─── 4. Socket.IO setup ───
 const io = new Server(server, {

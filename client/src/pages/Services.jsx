@@ -32,7 +32,7 @@ const Services = () => {
   // Filters State
   const [filters, setFilters] = useState({
     search: searchParams.get('q') || '',
-    category: searchParams.get('c') || '',
+    category: searchParams.get('category') || '',
     city: searchParams.get('l') || '',
     sort: searchParams.get('s') || 'nearest',
   });
@@ -41,7 +41,7 @@ const Services = () => {
   useEffect(() => {
     const params = {};
     if (filters.search) params.q = filters.search;
-    if (filters.category) params.c = filters.category;
+    if (filters.category) params.category = filters.category;
     if (filters.city) params.l = filters.city;
     if (filters.sort) params.s = filters.sort;
     if (viewMode !== 'list') params.v = viewMode;
@@ -153,6 +153,7 @@ const Services = () => {
               services={services}
               loading={loading}
               viewMode={viewMode}
+              filters={filters}
               hoveredServiceId={hoveredServiceId}
               onHover={setHoveredServiceId}
               onClearFilters={clearFilters}

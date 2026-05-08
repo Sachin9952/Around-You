@@ -6,14 +6,14 @@ import {
 } from 'react-icons/hi2';
 
 const categories = [
-  { name: 'Electrician', slug: 'electrician', icon: HiBolt, bg: 'bg-[#FEF0E6]', text: 'text-[#F2994A]' },
-  { name: 'Plumbing', slug: 'plumber', icon: HiWrenchScrewdriver, bg: 'bg-[#E0F5F3]', text: 'text-[#45B1A8]' },
-  { name: 'Cleaning', slug: 'cleaner', icon: HiSparkles, bg: 'bg-[#F3F1FF]', text: 'text-[#6D5AE6]' },
-  { name: 'AC Repair', slug: 'mechanic', icon: HiWrenchScrewdriver, bg: 'bg-[#E6F3FF]', text: 'text-[#2D9CDB]' },
-  { name: 'Carpenter', slug: 'carpenter', icon: HiWrenchScrewdriver, bg: 'bg-[#F5FDFD]', text: 'text-[#4A5568]' },
-  { name: 'Appliance Repair', slug: 'mechanic', icon: HiOutlineBeaker, bg: 'bg-[#FEECEB]', text: 'text-[#EB5757]' },
-  { name: 'Salon at Home', slug: 'salon', icon: HiUser, bg: 'bg-[#FDF2F8]', text: 'text-[#EC4899]' },
-  { name: 'Painting', slug: 'painter', icon: HiPaintBrush, bg: 'bg-[#ECFDF5]', text: 'text-[#10B981]' },
+  { name: 'Electrician', icon: HiBolt, bg: 'bg-[#FEF0E6]', text: 'text-[#F2994A]' },
+  { name: 'Plumber', icon: HiWrenchScrewdriver, bg: 'bg-[#E0F5F3]', text: 'text-[#45B1A8]' },
+  { name: 'Cleaner', icon: HiSparkles, bg: 'bg-[#F3F1FF]', text: 'text-[#6D5AE6]' },
+  { name: 'Mechanic', icon: HiWrenchScrewdriver, bg: 'bg-[#E6F3FF]', text: 'text-[#2D9CDB]' },
+  { name: 'Carpenter', icon: HiWrenchScrewdriver, bg: 'bg-[#F5FDFD]', text: 'text-[#4A5568]' },
+  { name: 'Appliance Repair', icon: HiOutlineBeaker, bg: 'bg-[#FEECEB]', text: 'text-[#EB5757]' },
+  { name: 'Salon', icon: HiUser, bg: 'bg-[#FDF2F8]', text: 'text-[#EC4899]' },
+  { name: 'Painter', icon: HiPaintBrush, bg: 'bg-[#ECFDF5]', text: 'text-[#10B981]' },
 ];
 
 const containerVars = {
@@ -48,9 +48,9 @@ const CategoriesOverlap = () => {
           className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 md:gap-6"
         >
           {categories.map((cat) => (
-            <motion.div variants={itemVars} key={cat.slug + cat.name}>
+            <motion.div variants={itemVars} key={cat.name}>
               <Link 
-                to={`/services?category=${cat.slug}`}
+                to={`/services?category=${cat.name.toLowerCase()}`}
                 className="flex flex-col items-center group cursor-pointer"
               >
                 <motion.div 

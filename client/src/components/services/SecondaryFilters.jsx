@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { HiChevronDown } from 'react-icons/hi';
 import ViewToggle from './ViewToggle';
 
-const categories = ['plumber', 'electrician', 'cleaner', 'painter', 'carpenter', 'mechanic', 'tutor', 'other'];
+const categories = ['plumber', 'electrician', 'cleaner', 'painter', 'carpenter', 'mechanic', 'tutor', 'salon', 'other'];
 
 const SecondaryFilters = ({ filters, updateFilter, viewMode, onViewChange, resultCount, loading, id = 'default' }) => {
   const [showSortDropdown, setShowSortDropdown] = useState(false);

@@ -126,7 +126,7 @@ exports.getNearbyServices = async (req, res, next) => {
 
       const updatedService = { ...service, isBookable };
 
-      // Distance calculation if querying by lat/lng
+      // 1. Distance calculation if querying by lat/lng (for sorting/display)
       if (lat && lng) {
         const { location } = service;
         if (location && typeof location === 'object' && location.lat && location.lng) {
@@ -138,29 +138,41 @@ exports.getNearbyServices = async (req, res, next) => {
           );
           if (distance !== null) {
             updatedService.distanceKm = distance;
-            acc.push(updatedService);
           }
         }
-      } 
-      // Fallback search by string match if no lat/lng provided (manual search)
-      else if (city || pincode) {
+      }
+
+      // 2. Location Filtering Logic
+      let matchesLocation = true;
+
+      // If city or pincode is provided, we MUST filter by it
+      if (city || pincode) {
+        matchesLocation = false;
         const { location } = service;
+        
         if (typeof location === 'string') {
           const locLow = location.toLowerCase();
           if ((city && locLow.includes(city.toLowerCase())) || (pincode && locLow.includes(pincode))) {
-            acc.push(updatedService);
+            matchesLocation = true;
           }
         } else if (typeof location === 'object') {
           const cLow = (location.city || '').toLowerCase();
           const pLow = (location.pincode || '').toLowerCase();
-          if ((city && cLow.includes(city.toLowerCase())) || (pincode && pLow === pincode)) {
-            acc.push(updatedService);
+          const addressLow = (location.address || '').toLowerCase();
+          
+          if (
+            (city && (cLow.includes(city.toLowerCase()) || addressLow.includes(city.toLowerCase()))) || 
+            (pincode && pLow === pincode)
+          ) {
+            matchesLocation = true;
           }
         }
-      } else {
-        // If no location parameters passed, return everything (base behavior)
+      }
+
+      if (matchesLocation) {
         acc.push(updatedService);
       }
+      
       return acc;
     }, []);
 

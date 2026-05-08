@@ -27,6 +27,7 @@ import Settings from './pages/Settings';
 import PostRequest from './pages/PostRequest';
 import Notifications from './pages/Notifications';
 import BecomeProvider from './pages/BecomeProvider';
+import About from './pages/About';
 import Footer from './components/Footer';
 import CardsDemo from './pages/CardsDemo';
 
@@ -49,6 +50,7 @@ const AnimatedRoutes = () => {
         <Route path="/chat-demo" element={<PageTransition><ChatDemo /></PageTransition>} />
         <Route path="/cards-demo" element={<PageTransition><CardsDemo /></PageTransition>} />
         <Route path="/become-provider" element={<PageTransition><BecomeProvider /></PageTransition>} />
+        <Route path="/about" element={<PageTransition><About /></PageTransition>} />
         <Route path="/inbox" element={<ProtectedRoute><PageTransition><Inbox /></PageTransition></ProtectedRoute>} />
 
         {/* Customer Routes (providers can also view their bookings) */}
