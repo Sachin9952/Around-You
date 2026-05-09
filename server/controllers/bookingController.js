@@ -72,7 +72,17 @@ exports.createBooking = async (req, res, next) => {
       date,
       time,
       notes,
-      address,
+      location: {
+        placeName: address.placeName || '',
+        address: address.address || '',
+        manualAddress: address.manualAddress || '',
+        placeId: address.placeId || '',
+        coordinates: {
+          lat: address.lat,
+          lng: address.lng
+        }
+      },
+      address, // Save the whole object to address too for backward compat
       customerName: customer?.name || '',
       providerName: provider?.name || '',
       serviceTitle: service.title,

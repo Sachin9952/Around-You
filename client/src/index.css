@@ -151,3 +151,36 @@
   scrollbar-width: thin;
   scrollbar-color: theme('colors.dark.500') transparent;
 }
+
+/* Custom scrollbar utility for dropdowns */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #F9FFFF;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #45B1A8;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #388E87;
+}
+
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #45B1A8 #F9FFFF;
+}
+
+/* Utility to hide scrollbar */
+.custom-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.custom-scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -8,16 +8,7 @@ import BookingLocationPicker from '../components/BookingLocationPicker';
 import { HiStar, HiLocationMarker, HiCurrencyRupee, HiPhone, HiMail, HiCalendar, HiChatAlt2, HiCheckCircle, HiExclamation } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
-const categoryImages = {
-  plumber: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=1200&q=80',
-  electrician: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=1200&q=80',
-  cleaner: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=80',
-  painter: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80',
-  carpenter: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=1200&q=80',
-  mechanic: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=1200&q=80',
-  tutor: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80',
-  default: 'https://images.unsplash.com/photo-1517646287270-a5a9ca602e5c?auto=format&fit=crop&w=1200&q=80'
-};
+import { getServiceImage } from '../utils/serviceImage';
 
 const ServiceDetail = () => {
   const { id } = useParams();
@@ -32,7 +23,7 @@ const ServiceDetail = () => {
   const [bookingData, setBookingData] = useState({
     date: '',
     time: '',
-    address: { address: '', lat: null, lng: null },
+    address: { placeName: '', address: '', manualAddress: '', placeId: '', lat: null, lng: null },
     notes: '',
   });
   const [bookingLoading, setBookingLoading] = useState(false);
@@ -81,7 +72,12 @@ const ServiceDetail = () => {
       });
       toast.success('Booking created successfully!');
       setShowBookingForm(false);
-      setBookingData({ date: '', time: '', address: { address: '', lat: null, lng: null }, notes: '' });
+      setBookingData({ date: '', time: '', address: { placeName: '', address: '', manualAddress: '', placeId: '', lat: null, lng: null }, notes: '' });
+      
+      // Redirect to dashboard to see the booking
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
     } catch (err) {
       toast.error(err.response?.data?.error || 'Booking failed');
     } finally {
@@ -131,12 +127,12 @@ const ServiceDetail = () => {
             {/* Blurred background layout for professional uncropped look */}
             <div 
               className="absolute inset-0 bg-cover bg-center blur-2xl opacity-50 scale-125"
-              style={{ backgroundImage: `url(${service.image || categoryImages[service.category] || categoryImages.default})` }}
+              style={{ backgroundImage: `url(${getServiceImage(service)})` }}
             ></div>
             
             {/* The actual uncropped responsive image */}
             <img 
-              src={service.image || categoryImages[service.category] || categoryImages.default} 
+              src={getServiceImage(service)}
               alt={service.title} 
               className="relative z-10 w-full h-full object-contain drop-shadow-2xl"
             />

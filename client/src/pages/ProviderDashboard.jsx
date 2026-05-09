@@ -128,7 +128,7 @@ const ProviderDashboard = () => {
 
   const tabConfig = [
     { key: 'bookings', label: 'Bookings', icon: HiCalendar },
-    { key: 'services', label: 'Services', icon: HiBriefcase },
+    { key: 'services', label: 'My Services', icon: HiBriefcase },
     { key: 'messages', label: 'Messages', icon: HiChatAlt2 },
   ];
 
@@ -153,18 +153,18 @@ const ProviderDashboard = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap items-center gap-2 mb-6 sm:mb-8 px-1 sm:px-2">
+        <div className="flex flex-nowrap items-center gap-2 mb-6 sm:mb-8 px-1 sm:px-2 overflow-x-auto custom-scrollbar-hide pb-2">
           {tabConfig.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 ${
+              className={`flex-shrink-0 flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-[11px] sm:text-sm transition-all duration-300 ${
                 activeTab === key
                   ? 'bg-[#45B1A8] text-white shadow-md'
                   : 'bg-white text-[#4A5568] hover:bg-[#E0F5F3] hover:text-[#45B1A8] border border-[#E0F5F3]'
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               {label}
             </button>
           ))}
@@ -259,14 +259,24 @@ const ProviderDashboard = () => {
                             <HiClock className="w-4 h-4 sm:w-5 sm:h-5 text-[#45B1A8] shrink-0" />
                             {booking.time}
                           </span>
-                           {booking.address && (
-                            <span className="flex items-start gap-2 col-span-1 sm:col-span-2">
-                              <HiLocationMarker className="w-4 h-4 sm:w-5 sm:h-5 text-[#45B1A8] shrink-0 mt-0.5" />
-                              <span className="line-clamp-2 break-words">
-                                {typeof booking.address === 'object' ? booking.address?.address : booking.address}
-                              </span>
-                            </span>
-                          )}
+                            <div className="flex flex-col col-span-1 sm:col-span-2">
+                              <div className="flex items-start gap-2">
+                                <HiLocationMarker className="w-4 h-4 sm:w-5 sm:h-5 text-[#45B1A8] shrink-0 mt-0.5" />
+                                <span className="line-clamp-2 break-words">
+                                  {booking.location?.address || (typeof booking.address === 'object' ? booking.address?.address : booking.address)}
+                                </span>
+                              </div>
+                              {(booking.location?.placeName || booking.address?.placeName) && (
+                                <span className="text-[10px] text-[#45B1A8] font-bold mt-0.5 ml-6 sm:ml-7">
+                                  {booking.location?.placeName || booking.address?.placeName}
+                                </span>
+                              )}
+                              {(booking.location?.manualAddress || booking.address?.manualAddress) && (
+                                <span className="text-[11px] text-gray-500 italic mt-0.5 ml-6 sm:ml-7">
+                                  Note: {booking.location?.manualAddress || booking.address?.manualAddress}
+                                </span>
+                              )}
+                            </div>
                         </div>
 
                         {booking.notes && (
@@ -364,8 +374,8 @@ const ProviderDashboard = () => {
               </button>
             </div>
 
-            {/* Service Form */}
-            {showServiceForm && (
+            {/* Service Form for NEW services */}
+            {showServiceForm && !editingService && (
               <div className="bg-white p-8 md:p-10 mb-8 rounded-[2rem] shadow-sm border border-[#E0F5F3]">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="w-10 h-10 bg-[#E0F5F3] rounded-full flex items-center justify-center">
@@ -528,46 +538,174 @@ const ProviderDashboard = () => {
             ) : (
               <div className="grid sm:grid-cols-2 gap-6">
                 {services.map((service) => (
-                  <div key={service._id} className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E0F5F3] shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1 min-w-0 mr-3">
-                        <h3 className="text-lg font-black text-[#1A2B2A] mb-1 line-clamp-1">{service.title}</h3>
-                        <span className="inline-block bg-[#E0F5F3] text-[#45B1A8] text-xs font-extrabold uppercase tracking-widest px-3 py-1 rounded-full">
-                          {service.category}
-                        </span>
+                  editingService?._id === service._id ? (
+                    /* Inline Edit Form */
+                    <div key={service._id} className="sm:col-span-2 bg-white p-8 md:p-10 mb-2 rounded-[2rem] shadow-sm border-2 border-[#45B1A8]/30">
+                      <div className="flex items-center gap-3 mb-8">
+                        <div className="w-10 h-10 bg-[#E0F5F3] rounded-full flex items-center justify-center">
+                          <HiPencil className="w-5 h-5 text-[#45B1A8]" />
+                        </div>
+                        <h3 className="text-xl font-bold text-[#1A2B2A]">Update Service</h3>
                       </div>
-                      <div className="flex gap-2 shrink-0">
-                        <button
-                          onClick={() => editService(service)}
-                          className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#F5FDFD] hover:bg-[#E0F5F3] text-[#4A5568] hover:text-[#45B1A8] transition-colors border border-[#E0F5F3]"
-                        >
-                          <HiPencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => deleteService(service._id)}
-                          className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#F5FDFD] hover:bg-red-50 text-[#4A5568] hover:text-red-500 transition-colors border border-[#E0F5F3]"
-                        >
-                          <HiTrash className="w-4 h-4" />
-                        </button>
+                      <form onSubmit={handleServiceSubmit} className="grid sm:grid-cols-2 gap-6">
+                        <div className="sm:col-span-2">
+                          <label className="block text-sm font-bold text-[#1A2B2A] mb-2 pl-1">Service Title</label>
+                          <input
+                            type="text"
+                            value={serviceForm.title}
+                            onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })}
+                            className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
+                            required
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="block text-sm font-bold text-[#1A2B2A] mb-2 pl-1">Description</label>
+                          <textarea
+                            value={serviceForm.description}
+                            onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })}
+                            className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none resize-none"
+                            rows="3"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-[#1A2B2A] mb-2 pl-1">Category</label>
+                          <select
+                            value={serviceForm.category}
+                            onChange={(e) => setServiceForm({ ...serviceForm, category: e.target.value })}
+                            className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
+                          >
+                            {categories.map(c => (
+                              <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="sm:col-span-2 grid sm:grid-cols-2 gap-4 border p-4 rounded-3xl bg-gray-50/50">
+                          <div className="sm:col-span-2 mb-2">
+                            <BookingLocationPicker 
+                              selectedLocation={serviceForm.location}
+                              onLocationChange={(loc) => {
+                                setServiceForm(prev => ({
+                                  ...prev,
+                                  location: {
+                                    ...prev.location,
+                                    lat: loc.lat,
+                                    lng: loc.lng,
+                                    address: loc.address || prev.location.address,
+                                    city: loc.city || prev.location.city,
+                                    pincode: loc.pincode || prev.location.pincode
+                                  }
+                                }));
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-500 mb-1 pl-1">City</label>
+                            <input
+                              type="text"
+                              value={serviceForm.location?.city || ''}
+                              onChange={(e) => setServiceForm(prev => ({ ...prev, location: { ...prev.location, city: e.target.value } }))}
+                              className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-500 mb-1 pl-1">Pincode</label>
+                            <input
+                              type="text"
+                              value={serviceForm.location?.pincode || ''}
+                              onChange={(e) => setServiceForm(prev => ({ ...prev, location: { ...prev.location, pincode: e.target.value } }))}
+                              className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
+                            />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <label className="block text-xs font-bold text-gray-500 mb-1 pl-1">Full Address</label>
+                            <input
+                              type="text"
+                              value={serviceForm.location?.address || ''}
+                              onChange={(e) => setServiceForm(prev => ({ ...prev, location: { ...prev.location, address: e.target.value } }))}
+                              className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-[#1A2B2A] mb-2 pl-1">Price (₹)</label>
+                          <input
+                            type="number"
+                            value={serviceForm.price}
+                            onChange={(e) => setServiceForm({ ...serviceForm, price: e.target.value })}
+                            className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
+                            min="0"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-[#1A2B2A] mb-2 pl-1">Price Type</label>
+                          <select
+                            value={serviceForm.priceType}
+                            onChange={(e) => setServiceForm({ ...serviceForm, priceType: e.target.value })}
+                            className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
+                          >
+                            <option value="fixed">Fixed (per job)</option>
+                            <option value="hourly">Hourly</option>
+                          </select>
+                        </div>
+                        <div className="sm:col-span-2 flex gap-3 pt-2">
+                          <button type="submit" className="bg-[#45B1A8] text-white px-10 py-3.5 rounded-full font-bold hover:bg-[#3a9990] shadow-md transition-all" disabled={formLoading}>
+                            {formLoading ? 'Updating...' : 'Save Changes'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setShowServiceForm(false); setEditingService(null); }}
+                            className="bg-white text-[#4A5568] border border-gray-200 px-8 py-3.5 rounded-full font-bold hover:bg-gray-50 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div key={service._id} className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E0F5F3] shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1 min-w-0 mr-3">
+                          <h3 className="text-lg font-black text-[#1A2B2A] mb-1 line-clamp-1">{service.title}</h3>
+                          <span className="inline-block bg-[#E0F5F3] text-[#45B1A8] text-xs font-extrabold uppercase tracking-widest px-3 py-1 rounded-full">
+                            {service.category}
+                          </span>
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => editService(service)}
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#F5FDFD] hover:bg-[#E0F5F3] text-[#4A5568] hover:text-[#45B1A8] transition-colors border border-[#E0F5F3]"
+                          >
+                            <HiPencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => deleteService(service._id)}
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#F5FDFD] hover:bg-red-50 text-[#4A5568] hover:text-red-500 transition-colors border border-[#E0F5F3]"
+                          >
+                            <HiTrash className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-sm text-[#4A5568] font-medium mb-5 line-clamp-2">{service.description}</p>
+                      <div className="flex items-center justify-between pt-4 border-t border-[#E0F5F3]/60">
+                        <div className="flex items-center gap-1.5">
+                          <HiCurrencyRupee className="w-5 h-5 text-[#45B1A8]" />
+                          <span className="text-xl font-black text-[#1A2B2A]">₹{service.price}</span>
+                          <span className="text-sm text-[#4A5568] font-medium">/ {service.priceType === 'hourly' ? 'hr' : 'job'}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-sm font-semibold text-[#4A5568] bg-[#F5FDFD] px-3 py-1.5 rounded-xl border border-[#E0F5F3]">
+                          <HiLocationMarker className="w-4 h-4 text-[#45B1A8]" />
+                          <span className="truncate max-w-[100px]">
+                            {typeof service.location === 'object' 
+                              ? (service.location?.address || service.location?.city || 'Location Details') 
+                              : (service.location || 'Unknown')}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <p className="text-sm text-[#4A5568] font-medium mb-5 line-clamp-2">{service.description}</p>
-                    <div className="flex items-center justify-between pt-4 border-t border-[#E0F5F3]/60">
-                      <div className="flex items-center gap-1.5">
-                        <HiCurrencyRupee className="w-5 h-5 text-[#45B1A8]" />
-                        <span className="text-xl font-black text-[#1A2B2A]">₹{service.price}</span>
-                        <span className="text-sm text-[#4A5568] font-medium">/ {service.priceType === 'hourly' ? 'hr' : 'job'}</span>
-                      </div>
-                       <div className="flex items-center gap-1.5 text-sm font-semibold text-[#4A5568] bg-[#F5FDFD] px-3 py-1.5 rounded-xl border border-[#E0F5F3]">
-                        <HiLocationMarker className="w-4 h-4 text-[#45B1A8]" />
-                        <span className="truncate max-w-[100px]">
-                          {typeof service.location === 'object' 
-                            ? (service.location?.address || service.location?.city || 'Location Details') 
-                            : (service.location || 'Unknown')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  )
                 ))}
               </div>
             )}

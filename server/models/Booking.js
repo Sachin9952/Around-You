@@ -35,9 +35,19 @@ const bookingSchema = new mongoose.Schema(
       maxlength: [500, 'Notes cannot exceed 500 characters'],
       default: '',
     },
+    location: {
+      placeName: { type: String, default: '' },
+      address: { type: String, default: '' },
+      manualAddress: { type: String, default: '' },
+      placeId: { type: String, default: '' },
+      coordinates: {
+        lat: { type: Number },
+        lng: { type: Number }
+      }
+    },
+    // Kept for backward compatibility with older bookings
     address: {
       type: mongoose.Schema.Types.Mixed,
-      required: [true, 'Please provide a service address'],
     },
     // Snapshot fields — preserved even if referenced docs are deleted
     customerName: { type: String, default: '' },

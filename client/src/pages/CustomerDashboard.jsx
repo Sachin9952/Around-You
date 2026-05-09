@@ -116,9 +116,21 @@ const CustomerDashboard = () => {
                       </span>
                       <span className="flex items-start gap-2 col-span-1 sm:col-span-2">
                         <HiLocationMarker className="w-4 h-4 sm:w-5 sm:h-5 text-[#45B1A8] shrink-0 mt-0.5" />
-                        <span className="line-clamp-2 break-words">
-                          {typeof booking.address === 'object' ? booking.address?.address : booking.address}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="line-clamp-2 break-words">
+                            {booking.location?.address || (typeof booking.address === 'object' ? booking.address?.address : booking.address)}
+                          </span>
+                          {(booking.location?.placeName || booking.address?.placeName) && (
+                            <span className="text-[10px] text-[#45B1A8] font-bold mt-0.5">
+                              {booking.location?.placeName || booking.address?.placeName}
+                            </span>
+                          )}
+                          {(booking.location?.manualAddress || booking.address?.manualAddress) && (
+                            <span className="text-[11px] text-gray-500 italic mt-0.5">
+                              Note: {booking.location?.manualAddress || booking.address?.manualAddress}
+                            </span>
+                          )}
+                        </div>
                       </span>
                     </div>
 

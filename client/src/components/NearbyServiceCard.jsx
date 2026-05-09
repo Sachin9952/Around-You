@@ -4,16 +4,7 @@ import { HiStar, HiLocationMarker } from 'react-icons/hi';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
-const categoryImages = {
-  plumber: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=400&q=80',
-  electrician: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=400&q=80',
-  cleaner: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=400&q=80',
-  painter: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=400&q=80',
-  carpenter: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=400&q=80',
-  mechanic: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=400&q=80',
-  tutor: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=400&q=80',
-  default: 'https://images.unsplash.com/photo-1517646287270-a5a9ca602e5c?auto=format&fit=crop&w=400&q=80'
-};
+import { getServiceImage } from '../utils/serviceImage';
 
 const NearbyServiceCard = ({ service, onHover }) => {
   const navigate = useNavigate();
@@ -53,7 +44,7 @@ const NearbyServiceCard = ({ service, onHover }) => {
           </div>
         )}
         <img 
-          src={service.image || categoryImages[service.category] || categoryImages.default} 
+          src={getServiceImage(service)} 
           alt={service.title} 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />

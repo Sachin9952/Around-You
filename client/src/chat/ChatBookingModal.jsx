@@ -11,7 +11,7 @@ const ChatBookingModal = ({ isOpen, onClose, providerId }) => {
   const [bookingService, setBookingService] = useState(null);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [address, setAddress] = useState({ address: '', lat: null, lng: null });
+  const [address, setAddress] = useState({ placeName: '', address: '', manualAddress: '', placeId: '', lat: null, lng: null });
   const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState(null);
 
