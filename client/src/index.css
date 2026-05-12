@@ -48,9 +48,7 @@
   }
 
   .card-glow {
-    @apply bg-dark-700 border border-dark-500 rounded-xl p-6
-      transition-all duration-300 hover:border-primary-500/50
-      hover:shadow-lg hover:shadow-primary-500/10;
+    @apply bg-dark-700 border border-dark-500 rounded-xl p-6 transition-all duration-300 hover:border-primary-500 hover:shadow-lg hover:shadow-primary-500;
   }
 
   .badge {
