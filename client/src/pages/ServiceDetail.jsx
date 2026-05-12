@@ -23,7 +23,7 @@ const ServiceDetail = () => {
   const [bookingData, setBookingData] = useState({
     date: '',
     time: '',
-    address: { placeName: '', address: '', manualAddress: '', placeId: '', lat: null, lng: null },
+    address: { placeName: '', address: '', manualAddress: '', houseNo: '', placeId: '', lat: null, lng: null },
     notes: '',
   });
   const [bookingLoading, setBookingLoading] = useState(false);
@@ -72,7 +72,7 @@ const ServiceDetail = () => {
       });
       toast.success('Booking created successfully!');
       setShowBookingForm(false);
-      setBookingData({ date: '', time: '', address: { placeName: '', address: '', manualAddress: '', placeId: '', lat: null, lng: null }, notes: '' });
+      setBookingData({ date: '', time: '', address: { placeName: '', address: '', manualAddress: '', houseNo: '', placeId: '', lat: null, lng: null }, notes: '' });
       
       // Redirect to dashboard to see the booking
       setTimeout(() => {
@@ -348,7 +348,11 @@ const ServiceDetail = () => {
                 />
               </div>
               <div className="md:col-span-2 pt-2">
-                <button type="submit" className="w-full md:w-auto bg-[#45B1A8] text-white px-10 py-4 rounded-full font-bold hover:bg-[#3a9990] hover:shadow-lg transition-all duration-300" disabled={bookingLoading}>
+                <button 
+                  type="submit" 
+                  className="w-full md:w-auto bg-[#45B1A8] text-white px-10 py-4 rounded-full font-bold hover:bg-[#3a9990] hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed" 
+                  disabled={bookingLoading || !bookingData.date || !bookingData.time || !bookingData.address?.lat || !bookingData.address?.houseNo?.trim()}
+                >
                   {bookingLoading ? 'Processing Booking...' : 'Confirm Appointment'}
                 </button>
               </div>

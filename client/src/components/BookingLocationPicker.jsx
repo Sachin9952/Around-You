@@ -193,6 +193,7 @@ const BookingLocationPicker = ({ selectedLocation, onLocationChange }) => {
       placeName: place.mainText,
       address: place.fullAddress,
       manualAddress: combinedManual,
+      houseNo: manualAddress.houseNo,
       placeId: place.id,
       lat: place.lat,
       lng: place.lng,
@@ -215,6 +216,7 @@ const BookingLocationPicker = ({ selectedLocation, onLocationChange }) => {
           placeName: result.placeName,
           address: result.address,
           manualAddress: combinedManual,
+          houseNo: manualAddress.houseNo,
           placeId: result.placeId,
           lat, lng,
         });
@@ -251,7 +253,7 @@ const BookingLocationPicker = ({ selectedLocation, onLocationChange }) => {
     
     if (selectedLocation?.lat) {
       const combinedManual = combineManualFields(newManual);
-      onLocationChange({ ...selectedLocation, manualAddress: combinedManual });
+      onLocationChange({ ...selectedLocation, manualAddress: combinedManual, houseNo: newManual.houseNo });
     }
   };
 
@@ -455,9 +457,10 @@ const BookingLocationPicker = ({ selectedLocation, onLocationChange }) => {
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Flat / House No</label>
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Flat / House No <span className="text-red-500">*</span></label>
             <input
               type="text"
+              required
               value={manualAddress.houseNo}
               onChange={(e) => updateManualAddress('houseNo', e.target.value)}
               placeholder="e.g. Flat 402, Royal Apt"
