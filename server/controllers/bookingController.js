@@ -153,7 +153,7 @@ exports.updateBookingStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
 
-    const validStatuses = ['accepted', 'rejected', 'completed'];
+    const validStatuses = ['accepted', 'rejected', 'on_the_way', 'completed'];
     if (!validStatuses.includes(status)) {
       return next(
         new ErrorResponse(`Invalid status. Must be one of: ${validStatuses.join(', ')}`, 400)
@@ -171,8 +171,37 @@ exports.updateBookingStatus = async (req, res, next) => {
       return next(new ErrorResponse('Not authorized to update this booking', 403));
     }
 
+    const currentStatus = booking.status;
+
+    // Validate strict state transitions
+    if (status === 'accepted' || status === 'rejected') {
+      if (currentStatus !== 'pending') {
+        return next(new ErrorResponse('Can only accept or reject a pending booking', 400));
+      }
+    } else if (status === 'on_the_way') {
+      if (currentStatus !== 'accepted') {
+        return next(new ErrorResponse('Can only mark as "on the way" after the booking is accepted', 400));
+      }
+    } else if (status === 'completed') {
+      if (currentStatus !== 'on_the_way') {
+        return next(new ErrorResponse('Can only mark as completed once the provider is on the way', 400));
+      }
+    }
+
     booking.status = status;
     await booking.save();
+
+    // Socket.IO realtime status update notification
+    const io = req.app.get('io');
+    if (io) {
+      const payload = {
+        bookingId: booking._id.toString(),
+        status: booking.status,
+        updatedAt: booking.updatedAt
+      };
+      io.to(`user_${booking.customer.toString()}`).emit('booking_status_updated', payload);
+      io.to(`user_${booking.provider.toString()}`).emit('booking_status_updated', payload);
+    }
 
     res.status(200).json({
       success: true,
@@ -198,12 +227,25 @@ exports.cancelBooking = async (req, res, next) => {
       return next(new ErrorResponse('Not authorized to cancel this booking', 403));
     }
 
-    if (booking.status === 'completed') {
-      return next(new ErrorResponse('Cannot cancel a completed booking', 400));
+    // Customer can cancel booking only if status is pending or accepted
+    if (booking.status !== 'pending' && booking.status !== 'accepted') {
+      return next(new ErrorResponse('Can only cancel a booking that is pending or accepted', 400));
     }
 
     booking.status = 'cancelled';
     await booking.save();
+
+    // Socket.IO realtime status update notification
+    const io = req.app.get('io');
+    if (io) {
+      const payload = {
+        bookingId: booking._id.toString(),
+        status: booking.status,
+        updatedAt: booking.updatedAt
+      };
+      io.to(`user_${booking.customer.toString()}`).emit('booking_status_updated', payload);
+      io.to(`user_${booking.provider.toString()}`).emit('booking_status_updated', payload);
+    }
 
     res.status(200).json({
       success: true,

@@ -156,9 +156,9 @@ function App() {
     <Router>
       <AuthProvider>
         <MotionConfig transition={{ duration: 0.3, ease: 'easeInOut' }}>
-          <div className="min-h-screen bg-slate-50 flex flex-col">
+          <div className="min-h-screen bg-slate-50 flex flex-col w-full max-w-full overflow-x-hidden">
             <Navbar />
-            <main className="flex-1">
+            <main className="flex-1 w-full max-w-full overflow-x-hidden">
               <AnimatedRoutes />
             </main>
             <Footer />

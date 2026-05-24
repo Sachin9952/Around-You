@@ -6,13 +6,92 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import BookingLocationPicker from '../components/BookingLocationPicker';
 import { HiPlus, HiPencil, HiTrash, HiCheck, HiX, HiClock, HiExclamation, HiChatAlt2, HiCalendar, HiLocationMarker, HiCurrencyRupee, HiBriefcase } from 'react-icons/hi';
 import toast from 'react-hot-toast';
+import { getSocket } from '../utils/socket';
 
 const statusColors = {
   pending: 'bg-amber-50 text-amber-600 border-amber-200',
-  accepted: 'bg-blue-50 text-blue-600 border-blue-200',
-  rejected: 'bg-red-50 text-red-600 border-red-200',
+  accepted: 'bg-[#E0F5F3] text-[#45B1A8] border-[#45B1A8]/20',
+  on_the_way: 'bg-purple-50 text-purple-600 border-purple-200',
   completed: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+  rejected: 'bg-red-50 text-red-600 border-red-200',
   cancelled: 'bg-gray-100 text-gray-500 border-gray-200',
+};
+
+const BookingTimeline = ({ status }) => {
+  if (status === 'rejected') {
+    return (
+      <div className="mt-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-2xl text-xs font-bold flex items-center gap-2">
+        <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
+        Booking was rejected by you.
+      </div>
+    );
+  }
+  if (status === 'cancelled') {
+    return (
+      <div className="mt-4 p-3 bg-gray-50 text-gray-700 border border-gray-200 rounded-2xl text-xs font-bold flex items-center gap-2">
+        <span className="w-2 h-2 bg-gray-500 rounded-full" />
+        Booking was cancelled by the customer.
+      </div>
+    );
+  }
+
+  const steps = [
+    { label: 'Requested', key: 'pending' },
+    { label: 'Accepted', key: 'accepted' },
+    { label: 'On the way', key: 'on_the_way' },
+    { label: 'Completed', key: 'completed' }
+  ];
+
+  const getStepIndex = (s) => {
+    if (s === 'pending') return 0;
+    if (s === 'accepted') return 1;
+    if (s === 'on_the_way') return 2;
+    if (s === 'completed') return 3;
+    return -1;
+  };
+
+  const currentIndex = getStepIndex(status);
+
+  return (
+    <div className="mt-5 mb-3 px-2">
+      <div className="relative flex justify-between items-center w-full">
+        {/* Background Line */}
+        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-100 -translate-y-1/2 z-0" />
+        {/* Active Progress Line */}
+        <div 
+          className="absolute top-1/2 left-0 h-0.5 bg-[#45B1A8] -translate-y-1/2 z-0 transition-all duration-500" 
+          style={{ width: `${(currentIndex / (steps.length - 1)) * 100}%` }}
+        />
+        
+        {steps.map((step, idx) => {
+          const isActive = idx <= currentIndex;
+          const isCurrent = idx === currentIndex;
+          return (
+            <div key={step.key} className="relative z-10 flex flex-col items-center">
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                isCurrent 
+                  ? 'bg-white border-[#45B1A8] ring-4 ring-[#45B1A8]/20 text-[#45B1A8]'
+                  : isActive 
+                    ? 'bg-[#45B1A8] border-[#45B1A8] text-white' 
+                    : 'bg-white border-gray-200 text-gray-400'
+              }`}>
+                {isActive ? (
+                  <span className="text-[10px] font-black">✓</span>
+                ) : (
+                  <span className="text-[10px] font-black">{idx + 1}</span>
+                )}
+              </div>
+              <span className={`text-[9px] sm:text-[10px] font-bold mt-1.5 ${
+                isCurrent ? 'text-[#45B1A8] scale-105' : isActive ? 'text-[#1A2B2A]' : 'text-gray-400'
+              }`}>
+                {step.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 };
 
 const categories = ['plumber', 'electrician', 'cleaner', 'painter', 'carpenter', 'mechanic', 'tutor', 'other'];
@@ -53,6 +132,30 @@ const ProviderDashboard = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (socket) {
+      socket.connect();
+
+      const handleStatusUpdate = (payload) => {
+        const { bookingId, status } = payload;
+        setBookings((prev) =>
+          prev.map((b) => (b._id === bookingId ? { ...b, status } : b))
+        );
+        toast.success(`Booking status updated to ${status.replace(/_/g, ' ')}!`, {
+          icon: '🔔',
+          duration: 4000
+        });
+      };
+
+      socket.on('booking_status_updated', handleStatusUpdate);
+
+      return () => {
+        socket.off('booking_status_updated', handleStatusUpdate);
+      };
+    }
+  }, []);
 
   const fetchServices = async () => {
     setLoading(true);
@@ -313,13 +416,16 @@ const ProviderDashboard = () => {
                         )}
                       </div>
 
+                      {/* Timeline */}
+                      <BookingTimeline status={booking.status} />
+
                       {/* Action Buttons */}
                       <div className="flex flex-col gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-100">
                         {booking.status === 'pending' && (
                           <div className="grid grid-cols-2 gap-2 sm:gap-3">
                             <button
                               onClick={() => updateBookingStatus(booking._id, 'accepted')}
-                              className="flex items-center justify-center gap-1.5 sm:gap-2 bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:bg-emerald-500 hover:text-white transition-colors"
+                              className="flex items-center justify-center gap-1.5 sm:gap-2 bg-[#E0F5F3] text-[#45B1A8] border border-[#45B1A8]/20 px-3 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:bg-[#45B1A8] hover:text-white transition-colors"
                             >
                               <HiCheck className="w-4 h-4" /> Accept
                             </button>
@@ -333,10 +439,18 @@ const ProviderDashboard = () => {
                         )}
                         {booking.status === 'accepted' && (
                           <button
-                            onClick={() => updateBookingStatus(booking._id, 'completed')}
-                            className="w-full flex items-center justify-center gap-2 bg-[#E0F5F3] text-[#45B1A8] px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:bg-[#45B1A8] hover:text-white transition-colors"
+                            onClick={() => updateBookingStatus(booking._id, 'on_the_way')}
+                            className="w-full flex items-center justify-center gap-2 bg-purple-50 text-purple-600 border border-purple-200 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:bg-purple-500 hover:text-white transition-colors"
                           >
-                            <HiCheck className="w-4 h-4" /> Mark Complete
+                            Mark as On The Way
+                          </button>
+                        )}
+                        {booking.status === 'on_the_way' && (
+                          <button
+                            onClick={() => updateBookingStatus(booking._id, 'completed')}
+                            className="w-full flex items-center justify-center gap-2 bg-emerald-50 text-emerald-600 border border-emerald-200 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:bg-emerald-500 hover:text-white transition-colors"
+                          >
+                            <HiCheck className="w-4 h-4" /> Mark as Completed
                           </button>
                         )}
                         {booking.customer?._id && (
@@ -347,8 +461,7 @@ const ProviderDashboard = () => {
                             <HiChatAlt2 className="w-4 h-4 text-[#45B1A8]" /> Message
                           </button>
                         )}
-                      </div>
-
+                      </div> 
                     </div>
                   </div>
                 ))}

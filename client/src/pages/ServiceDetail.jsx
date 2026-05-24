@@ -117,11 +117,11 @@ const ServiceDetail = () => {
   if (!service) return null;
 
   return (
-    <div className="bg-[#F5FDFD] min-h-screen pt-12 pb-24 font-sans">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in">
+    <div className="bg-[#F5FDFD] min-h-screen pt-12 pb-24 font-sans w-full max-w-full overflow-x-hidden">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in w-full min-w-0 overflow-hidden">
         
         {/* Service Header Card */}
-        <div className="bg-white mb-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(69,177,168,0.06)] border border-[#E0F5F3] overflow-hidden">
+        <div className="bg-white mb-8 rounded-3xl sm:rounded-[2.5rem] shadow-[0_8px_30px_rgb(69,177,168,0.06)] border border-[#E0F5F3] overflow-hidden">
           {/* Hero Banner Image */}
           <div className="w-full h-56 sm:h-72 md:h-96 relative overflow-hidden bg-[#1A2B2A] flex justify-center items-center">
             {/* Blurred background layout for professional uncropped look */}
@@ -141,7 +141,7 @@ const ServiceDetail = () => {
             <div className="absolute inset-0 z-20 bg-gradient-to-t from-[#1A2B2A]/40 via-transparent to-transparent pointer-events-none"></div>
           </div>
           
-          <div className="p-8 md:p-12">
+          <div className="p-4 sm:p-8 md:p-12">
             {/* Archived Service Banner */}
             {service.isBookable === false && (
               <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-6 py-4 mb-8">
@@ -154,8 +154,8 @@ const ServiceDetail = () => {
                 </div>
               </div>
             )}
-            <div className="flex flex-col lg:flex-row lg:items-start gap-10">
-            <div className="flex-1">
+            <div className="flex flex-col lg:flex-row lg:items-start gap-10 w-full max-w-full min-w-0 overflow-hidden">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-6">
                 <span className="bg-[#E0F5F3] text-[#45B1A8] px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wide">
                   {service.category}
@@ -176,8 +176,8 @@ const ServiceDetail = () => {
                 {service.description || 'Experience top-tier quality and convenience with our professional service designed to meet your specific needs perfectly.'}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-6 mb-8 bg-[#F5FDFD] p-6 rounded-3xl border border-[#E0F5F3]">
-                <div className="flex-1">
+              <div className="flex flex-col sm:flex-row gap-6 mb-8 bg-[#F5FDFD] p-6 rounded-3xl border border-[#E0F5F3] w-full max-w-full min-w-0">
+                <div className="flex-1 min-w-0">
                   <span className="text-sm uppercase tracking-wider font-bold text-gray-400 block mb-1">Pricing</span>
                   <div className="flex items-center gap-1.5">
                     <HiCurrencyRupee className="w-6 h-6 text-[#45B1A8]" />
@@ -189,11 +189,13 @@ const ServiceDetail = () => {
                   <div className="w-px bg-[#E0F5F3] hidden sm:block"></div>
                 )}
                 {service.location && (
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <span className="text-sm uppercase tracking-wider font-bold text-gray-400 block mb-2">Location</span>
-                    <div className="flex items-center gap-2 text-[#1A2B2A] font-semibold">
-                      <HiLocationMarker className="w-5 h-5 text-[#45B1A8]" />
-                      {typeof service.location === 'object' ? service.location?.address : service.location}
+                    <div className="flex items-start gap-2 text-[#1A2B2A] font-semibold min-w-0 w-full">
+                      <HiLocationMarker className="w-5 h-5 text-[#45B1A8] shrink-0 mt-0.5" />
+                      <span className="break-words min-w-0">
+                        {typeof service.location === 'object' ? service.location?.address : service.location}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -215,7 +217,7 @@ const ServiceDetail = () => {
 
             {/* Provider Info Card */}
             {service.provider ? (
-              <div className="lg:w-80 flex-shrink-0 bg-white border-2 border-[#E0F5F3] rounded-[2rem] p-8 shadow-sm">
+              <div className="w-full lg:w-80 flex-shrink-0 bg-white border-2 border-[#E0F5F3] rounded-[2rem] p-6 sm:p-8 shadow-sm">
                 <div className="flex items-center gap-2 mb-6">
                   <HiCheckCircle className="w-5 h-5 text-[#45B1A8]" />
                   <h3 className="text-sm font-bold text-[#1A2B2A] uppercase tracking-wider">Service Provider</h3>
@@ -256,7 +258,7 @@ const ServiceDetail = () => {
                 )}
               </div>
             ) : (
-              <div className="lg:w-80 flex-shrink-0 bg-gray-50 border-2 border-gray-200 rounded-[2rem] p-8 shadow-sm">
+              <div className="w-full lg:w-80 flex-shrink-0 bg-gray-50 border-2 border-gray-200 rounded-[2rem] p-6 sm:p-8 shadow-sm">
                 <div className="flex items-center gap-2 mb-6">
                   <HiExclamation className="w-5 h-5 text-gray-400" />
                   <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Service Provider</h3>
@@ -292,7 +294,7 @@ const ServiceDetail = () => {
 
         {/* Booking Form */}
         {showBookingForm && (
-          <div className="bg-white p-8 md:p-12 mb-8 rounded-[2.5rem] shadow-sm border border-[#E0F5F3] animate-fade-in origin-top">
+          <div className="bg-white p-4 sm:p-8 md:p-12 mb-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-sm border border-[#E0F5F3] animate-fade-in origin-top w-full">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 bg-[#E0F5F3] rounded-full flex items-center justify-center">
                 <HiCalendar className="w-5 h-5 text-[#45B1A8]" />
@@ -300,14 +302,14 @@ const ServiceDetail = () => {
               <h2 className="text-2xl font-bold text-[#1A2B2A]">Schedule Your Appointment</h2>
             </div>
             
-            <form onSubmit={handleBooking} className="grid md:grid-cols-2 gap-6">
+            <form onSubmit={handleBooking} className="grid md:grid-cols-2 gap-6 w-full max-w-full min-w-0 overflow-hidden">
               <div>
                 <label className="block text-sm font-bold text-[#1A2B2A] mb-2 pl-1">Preferred Date</label>
                 <input
                   type="date"
                   value={bookingData.date}
                   onChange={(e) => setBookingData({ ...bookingData, date: e.target.value })}
-                  className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
+                  className="w-full max-w-full min-w-0 bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
                   required
                   min={new Date().toISOString().split('T')[0]}
                 />
@@ -317,7 +319,7 @@ const ServiceDetail = () => {
                 <select
                   value={bookingData.time}
                   onChange={(e) => setBookingData({ ...bookingData, time: e.target.value })}
-                  className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
+                  className="w-full max-w-full min-w-0 bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none"
                   required
                 >
                   <option value="">Select a time slot...</option>
@@ -331,7 +333,7 @@ const ServiceDetail = () => {
                   <option value="05:00 PM">05:00 PM</option>
                 </select>
               </div>
-              <div className="md:col-span-2">
+              <div className="md:col-span-2 w-full max-w-full min-w-0 overflow-hidden">
                 <BookingLocationPicker 
                   selectedLocation={bookingData.address}
                   onLocationChange={(loc) => setBookingData({ ...bookingData, address: loc })}
@@ -342,7 +344,7 @@ const ServiceDetail = () => {
                 <textarea
                   value={bookingData.notes}
                   onChange={(e) => setBookingData({ ...bookingData, notes: e.target.value })}
-                  className="w-full bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none resize-none"
+                  className="w-full max-w-full min-w-0 bg-[#F5FDFD] text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none resize-none"
                   rows="3"
                   placeholder="Any specific instructions or requirements..."
                 />
@@ -361,7 +363,7 @@ const ServiceDetail = () => {
         )}
 
         {/* Reviews Section */}
-        <div className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-sm border border-[#E0F5F3]">
+        <div className="bg-white p-4 sm:p-8 md:p-12 rounded-[2rem] sm:rounded-[2.5rem] shadow-sm border border-[#E0F5F3] w-full">
           <h2 className="text-2xl font-bold text-[#1A2B2A] mb-8">
             Customer Reviews {reviews.length > 0 && <span className="text-[#45B1A8]">({reviews.length})</span>}
           </h2>
@@ -379,7 +381,7 @@ const ServiceDetail = () => {
               <textarea
                 value={reviewData.comment}
                 onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
-                className="w-full bg-white text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none resize-none mb-4"
+                className="w-full max-w-full min-w-0 bg-white text-[#1A2B2A] font-medium border border-[#E0F5F3] rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-[#45B1A8]/50 focus:border-[#45B1A8] transition-all outline-none resize-none mb-4"
                 rows="3"
                 placeholder="How was the service?"
               />

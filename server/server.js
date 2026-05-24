@@ -201,6 +201,7 @@ app.use('/api/support', require('./routes/supportRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use("/api/messages", require("./routes/messageRoutes"));
 app.use("/api/upload", require("./routes/uploadRoutes"));
+app.use('/api/addresses', require('./routes/addressRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => {

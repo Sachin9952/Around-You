@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import { io } from "socket.io-client";
+import { getSocket } from "../utils/socket";
 import { AnimatePresence, motion } from "framer-motion";
 import { HiChevronDown } from "react-icons/hi2";
 import { HiSignal, HiSignalSlash } from "react-icons/hi2";
@@ -51,31 +51,6 @@ const DUMMY_MESSAGES = [
     status: "sent",
   },
 ];
-
-// Helper: create or return an existing socket with the *current* JWT token.
-// We keep the reference in a module-level variable so every Chat mount
-// shares the same connection, but re-create it when the token changes.
-let _socket = null;
-let _lastToken = null;
-
-function getSocket() {
-  const token = localStorage.getItem("token");
-  if (!_socket || _lastToken !== token) {
-    if (_socket) _socket.disconnect();
-    _lastToken = token;
-    _socket = io(import.meta.env.VITE_API_URL || "http://localhost:5000", {
-      autoConnect: false,
-      auth: { token },
-      transports: ["websocket", "polling"],   // Explicit transport order
-      reconnection: true,                      // Enable auto-reconnection
-      reconnectionAttempts: 15,                // Retry up to 15 times
-      reconnectionDelay: 1000,                 // Start with 1 s delay
-      reconnectionDelayMax: 5000,              // Max 5 s between retries
-      timeout: 20000,                          // 20 s timeout (covers Render cold starts)
-    });
-  }
-  return _socket;
-}
 
 /**
  * Chat — Main chat component orchestrating:
